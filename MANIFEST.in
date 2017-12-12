@@ -1,0 +1,6 @@
+include versioneer.py
+include rnbgrader/_version.py
+include README.rst
+include LICENSE
+include *requirements.txt
+recursive-include rnbgrader/tests/data *

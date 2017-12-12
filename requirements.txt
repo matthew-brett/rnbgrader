@@ -1,0 +1,4 @@
+# Minimum requirements
+#
+rpy2
+Pillow
