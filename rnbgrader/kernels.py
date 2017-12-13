@@ -24,7 +24,7 @@ class JupyterKernel(object):
     Examples
     --------
     >>> kernel = JupyterKernel("ir")
-    >>> reply, outputs = run_code('a = 1')
+    >>> reply, outputs = kernel.run_code('a = 1')
     """
 
     def __init__(self, kernel_name, timeout=DEFAULT_TIMEOUT):
