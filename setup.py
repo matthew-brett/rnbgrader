@@ -46,8 +46,10 @@ setup(name='rnbgrader',
           'Intended Audience :: Developers',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: BSD License',
-          'Programming Language :: Python',
           'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
           'Topic :: Scientific/Engineering',
           'Operating System :: Microsoft :: Windows',
           'Operating System :: POSIX',
@@ -55,5 +57,7 @@ setup(name='rnbgrader',
           'Operating System :: MacOS',
         ],
       long_description = open('README.rst', 'rt').read(),
-      extras_require = {'test': test_requires}
+      extras_require = {'test': test_requires},
+      # For pip versions >= 9
+      python_requires = '>=3.4'
       )

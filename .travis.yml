@@ -8,7 +8,8 @@ cache:
 
 env:
     global:
-        - DEPENDS="rpy2"
+        # Depends also on jupyter_client, but this must be installed earlier
+        - DEPENDS=""
         - PKG_NAME=rnbgrader
         - INSTALL_TYPE="pip"
         # URL for extra wheel repo
