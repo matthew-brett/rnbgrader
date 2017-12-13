@@ -1,5 +1,5 @@
 # Minimum requirements
 #
-rpy2
 Pillow
 mistune
+jupyter_client
