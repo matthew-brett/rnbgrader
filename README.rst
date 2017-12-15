@@ -29,7 +29,7 @@ Released under the BSD two-clause license - see the file ``LICENSE`` in the
 source distribution.
 
 `travis-ci <https://travis-ci.org/matthew-brett/rnbgrader>`_ kindly tests the
-code automatically under Python versions 2.7, and 3.3 through 3.6.
+code automatically under Python versions 3.4 through 3.6.
 
 The latest released version is at https://pypi.python.org/pypi/rnbgrader
 
@@ -37,7 +37,7 @@ The latest released version is at https://pypi.python.org/pypi/rnbgrader
 Tests
 *****
 
-* Install ``rnbgrader``
+* Install ``rnbgrader``;
 * Install the pytest_ testing framework::
 
     pip install pytest

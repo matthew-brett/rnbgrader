@@ -8,8 +8,18 @@ Extract code chunks from notebook.
 import re
 import json
 from collections import OrderedDict
+from distutils.version import LooseVersion
 
-from pypandoc import convert_text
+from pypandoc import convert_text, get_pandoc_version
+
+# The specified minimum version from
+# https://cran.r-project.org/web/packages/rmarkdown/index.html
+# as of 15 Dec 2017.
+MINIMUM_PANDOC_VERSION = '1.12.3'
+
+if LooseVersion(get_pandoc_version()) < MINIMUM_PANDOC_VERSION:
+    raise RuntimeError('Need pandoc >= {} but have {}'.format(
+        MINIMUM_PANDOC_VERSION, get_pandoc_version()))
 
 
 def read_file(file_ish, encoding='utf8'):
@@ -39,14 +49,20 @@ def parse_codeblock(contents):
     kvs = OrderedDict(kvs)
     options = language = ''
     if len(classes) > 1:
+        # We don't know what to do about this case (e.g. "R, something"), but
+        # it probably cannot be an R Markdown chunk.
         return None
     elif len(classes) == 1:
+        # Should always be just {r} for a chunk, but just in case ...
         match = RMD_HEADER_RE.match(classes[0])
         if match is None:
+            # Could be some other Markdown code block formatting.
             return None
         language, options, _ = match.groups()
         assert _ == ''
     else:
+        # We're expecting the code text to start with the {r whatever}
+        # parameters.
         match = RMD_HEADER_RE.match(code)
         if match is None:
             return None
@@ -57,8 +73,7 @@ def parse_codeblock(contents):
 def _get_chunks(blocks):
     for block in blocks:
         if isinstance(block, list):
-            for chunk in _get_chunks(block):
-                yield chunk
+            yield from _get_chunks(block)
         elif not isinstance(block, dict):
             continue
         elif block['t'] in ('Code', 'CodeBlock'):
@@ -66,8 +81,7 @@ def _get_chunks(blocks):
             if chunk is not None:
                 yield chunk
         elif 'c' in block and isinstance(block['c'], list):
-            for chunk in _get_chunks(block['c']):
-                yield chunk
+            yield from _get_chunks(block['c'])
 
 
 class RNotebook(object):
@@ -85,7 +99,16 @@ class RNotebook(object):
         self._chunks = tuple(self._get_chunks())
 
     def _get_chunks(self):
-        return _get_chunks(self.ast['blocks'])
+        return _get_chunks(self._get_ast_content())
+
+    def _get_ast_content(self):
+        # At some point before Pandoc 1.19.2.1, ast was a two-element list with
+        # first element 'unMeta', second having content.
+        ast = self.ast
+        if hasattr(ast, 'keys'):
+            return ast['blocks']
+        assert list(ast[0].keys()) == ['unMeta']
+        return ast[1]
 
     @property
     def ast(self):

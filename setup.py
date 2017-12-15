@@ -58,4 +58,6 @@ setup(name='rnbgrader',
         ],
       long_description = open('README.rst', 'rt').read(),
       extras_require = {'test': test_requires},
+      # For pip versions >= 9
+      python_requires = '>=3.4'
       )
