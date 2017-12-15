@@ -1,5 +1,5 @@
 # Minimum requirements
 #
 Pillow
-mistune
+pypandoc
 jupyter_client

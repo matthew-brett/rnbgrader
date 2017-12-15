@@ -5,34 +5,114 @@ Parse R notebook in R Markdown.
 Extract code chunks from notebook.
 """
 
-from mistune import preprocessing, BlockLexer
+import re
+import json
+from collections import OrderedDict
 
-BLOCK = BlockLexer()
+from pypandoc import convert_text
 
 
-def read_file(file_ish):
-    """ Read and return string contents of notebook in `file_ish`
+def read_file(file_ish, encoding='utf8'):
+    """ Read and return string contents in `file_ish`
     """
     if hasattr(file_ish, 'read'):
         return file_ish.read()
-    with open(file_ish, 'rt', encoding='utf8') as fobj:
+    with open(file_ish, 'rt', encoding=encoding) as fobj:
         return fobj.read()
 
 
-def load(file_ish):
-    """ Read contents of `file_ish`, return as parsed notebook.
+class Chunk(object):
+
+    def __init__(self, code, language, classes, options='', id='', kvs=None):
+        self.language = language
+        self.code = code
+        self.classes = classes
+        self.id = id
+        self.kvs = {} if kvs is None else kvs
+
+
+RMD_HEADER_RE = re.compile(r'{(\w+)(?:[, ]*)(.*?)}(?: *)(.*)')
+
+
+def parse_codeblock(contents):
+    (id, classes, kvs), code = contents
+    kvs = OrderedDict(kvs)
+    options = language = ''
+    if len(classes) > 1:
+        return None
+    elif len(classes) == 1:
+        match = RMD_HEADER_RE.match(classes[0])
+        if match is None:
+            return None
+        language, options, _ = match.groups()
+        assert _ == ''
+    else:
+        match = RMD_HEADER_RE.match(code)
+        if match is None:
+            return None
+        language, options, code = match.groups()
+    return Chunk(code, language, classes, options, id, kvs)
+
+
+def _get_chunks(blocks):
+    for block in blocks:
+        if isinstance(block, list):
+            for chunk in _get_chunks(block):
+                yield chunk
+        elif not isinstance(block, dict):
+            continue
+        elif block['t'] in ('Code', 'CodeBlock'):
+            chunk = parse_codeblock(block['c'])
+            if chunk is not None:
+                yield chunk
+        elif 'c' in block and isinstance(block['c'], list):
+            for chunk in _get_chunks(block['c']):
+                yield chunk
+
+
+class RNotebook(object):
+    """ Object wrapping R Markdown notebook
+
+    Properties: nb_str; ast; chunks
     """
-    return loads(read_file(file_ish))
+
+    def __init__(self, nb_str):
+        """ Initialize object from string `nb_str`
+        """
+        self.nb_str = nb_str
+        self._ast = json.loads(
+            convert_text(nb_str, 'json', format='markdown'))
+        self._chunks = tuple(self._get_chunks())
+
+    def _get_chunks(self):
+        return _get_chunks(self.ast['blocks'])
+
+    @property
+    def ast(self):
+        return self._ast
+
+    @property
+    def chunks(self):
+        return self._chunks
+
+    @classmethod
+    def from_string(cls, in_str):
+        """ Initialize from string `nb_str`, return as Notebook object
+        """
+        return cls(in_str)
+
+    @classmethod
+    def from_file(cls, file_ish):
+        """ Initialize from contents of `file_ish`, return as Notebook object
+        """
+        return cls.from_string(read_file(file_ish))
+
+    def __eq__(self, other):
+        if not hasattr(other, 'nb_str'):
+            return False
+        return self.nb_str == other.nb_str
 
 
-def loads(nb_str):
-    """ Parse string `nb_str`, return as parsed notebook.
-    """
-    BLOCK.tokens[:] = []
-    return BLOCK(preprocessing(nb_str))
+load = RNotebook.from_file
 
-
-def as_chunks(nb_obj):
-    """ Extract chunks from parsed notebook `nb_obj`
-    """
-    return [p for p in nb_obj if p['type'] == 'code']
+loads = RNotebook.from_string

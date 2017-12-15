@@ -1,0 +1,20 @@
+Text starts.
+```{r echo=FALSE}
+a = 1
+a
+```
+Text continues.
+```{#mycode .r .numberLines startFrom="100"}
+b = 3
+```
+Text continues again.
+```{r }
+a = 1
+a
+```
+Text is resolute.
+```{python echo=FALSE}
+p = 1
+p
+```
+Text ends.
