@@ -9,13 +9,11 @@ cache:
 env:
     global:
         # Depends also on jupyter_client, but this must be installed earlier
-        - DEPENDS="pypandoc"
+        - DEPENDS=""
         - PKG_NAME=rnbgrader
         - INSTALL_TYPE="pip"
         # URL for extra wheel repo
         - EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
-        # Version of pandoc to install
-        - PANDOC_VERSION=2.0.5
 
 python:
     - 3.4
@@ -28,10 +26,7 @@ matrix:
       env:
         - COVERAGE=1
         - DOCTESTS=1
-    # Add absolute minimum dependencies
-    - python: 3.5
-      env:
-        - PANDOC_VERSION=1.13.2
+    # FIXME: Add absolute minimum dependencies
     # Check also requirements.txt
     - python: 3.5
       env:
@@ -66,10 +61,6 @@ before_install:
     - echo 'options("repos"="http://cran.rstudio.com")' > ~/.Rprofile
     - sudo Rscript -e "install.packages(c('repr', 'IRdisplay', 'crayon', 'pbdZMQ', 'devtools'))"
     - sudo Rscript -e "devtools::install_github('IRkernel/IRkernel')"
-    # For pypandoc
-    - PANDOC_DEB="pandoc-${PANDOC_VERSION}-1-amd64.deb"
-    - curl -LO https://github.com/jgm/pandoc/releases/download/$PANDOC_VERSION/$PANDOC_DEB
-    - sudo dpkg --install $PANDOC_DEB
     # Update virtualenv etc
     - pip install -U virtualenv
     - virtualenv --python=python venv
