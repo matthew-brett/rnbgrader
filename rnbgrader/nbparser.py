@@ -19,10 +19,10 @@ def read_file(file_ish, encoding='utf8'):
 
 class Chunk(object):
 
-    def __init__(self, code, language, line, classes=(), options='', id='', kvs=None):
+    def __init__(self, code, language, line_no, classes=(), options='', id='', kvs=None):
         self.code = code
         self.language = language
-        self.line = line
+        self.line_no = line_no
         self.classes = tuple(classes)
         self.id = id
         self.kvs = {} if kvs is None else kvs

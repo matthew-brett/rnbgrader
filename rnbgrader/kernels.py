@@ -22,12 +22,16 @@ DEFAULT_TIMEOUT = 15
 
 
 class JupyterKernel(object):
-    """ Helper class to instantiate and use a Jupyter kernel
+    r""" Helper class to instantiate and use a Jupyter kernel
 
     Examples
     --------
     >>> kernel = JupyterKernel("ir")
-    >>> reply, outputs = kernel.raw_run('a = 1')
+    >>> outputs = kernel.run_code('a = 1\na')
+    >>> len(outputs)
+    1
+    >>> outputs[0]['content']
+    '1'
     """
 
     def __init__(self, kernel_name, timeout=DEFAULT_TIMEOUT):

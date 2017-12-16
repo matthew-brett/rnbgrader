@@ -50,7 +50,7 @@ def test_chunks():
     for nb_def in NB_DEFS:
         fname = pjoin(DATA_DIR, nb_def['name'] + '.Rmd')
         nb = load(fname)
-        assert (tuple((c.language, c.code, c.line) for c in nb.chunks) ==
+        assert (tuple((c.language, c.code, c.line_no) for c in nb.chunks) ==
                 nb_def['chunk_defs'])
 
 
