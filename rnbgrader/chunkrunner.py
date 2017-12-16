@@ -4,20 +4,21 @@
 from .kernels import JupyterKernel
 
 
-class NotebookRunner(object):
+class ChunkRunner(object):
 
-    def __init__(self, notebook, kernel='ir', stop_on_error=True):
+    def __init__(self, chunks, kernel='ir', stop_on_error=True):
         """ Initialize notebook runner
 
         Parameters
         ----------
-        notebook : notebook instance
+        chunk : sequence of chunks
+            Sequence of notebook code chunk instances.
         kernel : string or kernel instance, optional
             Can be string giving kernel name, or kernel instance.
         stop_on_error : {True, False}, optional
-            Whether to stop evaluating notebook at first error.
+            Whether to stop evaluating chunks at first error.
         """
-        self.notebook = notebook
+        self.chunks = chunks
         self._own_kernel = not hasattr(kernel, 'km')
         self.kernel = JupyterKernel(kernel) if self._own_kernel else kernel
         self.stop_on_error = stop_on_error
@@ -56,7 +57,7 @@ class NotebookRunner(object):
         results = []
         any_error = False
         messages = []
-        for chunk in self.notebook.chunks:
+        for chunk in self.chunks:
             if any_error and self.stop_on_error:
                 results.append((chunk, None))
                 continue

@@ -57,3 +57,7 @@ def test_run_code():
     output, = rk.run_code('plot(cars)')
     assert output['type'] == 'image'
     assert isinstance(output['content'], PIL.PngImagePlugin.PngImageFile)
+    output, = rk.run_code('NULL')
+    assert _stripped(output) == dict(type='text', content='NULL')
+    output, = rk.run_code('print(1 + 2)')
+    assert _stripped(output) == dict(type='stdout', content='[1] 3\n')

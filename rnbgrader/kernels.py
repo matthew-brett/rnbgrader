@@ -117,14 +117,19 @@ class JupyterKernel(object):
         return reply, output_msgs
 
     def _process_output(self, msg):
+        content = msg['content']
         if msg['msg_type'] == 'error':
             return dict(type='error',
                         message=msg,
-                        content=msg['content']['evalue'])
-        data = msg['content']['data']
+                        content=content['evalue'])
+        if msg['msg_type'] == 'stream':
+            return dict(type=content['name'],
+                        message=msg,
+                        content=content['text'])
         if msg['msg_type'] != 'display_data':
             raise RuntimeError("Don't recognize message type " +
                                msg['msg_type'])
+        data = msg['content']['data']
         if 'image/png' in data:
             img_bytes = decodebytes(data['image/png'].encode('ascii'))
             png = Image.open(io.BytesIO(img_bytes))
@@ -135,6 +140,10 @@ class JupyterKernel(object):
             return dict(type='text',
                         message=msg,
                         content=data['text/markdown'])
+        if 'text/plain' in data:
+            return dict(type='text',
+                        message=msg,
+                        content=data['text/plain'])
         raise RuntimeError("Don't recognize data {}".format(data))
 
     def run_code(self, code, timeout=None,
