@@ -15,4 +15,19 @@ A numbered list:
     b = 2
     b
     ```
-Does that work?
+     The list continues, but this chunk has irregular indentation:
+
+    ```{r}
+c = 3
+  c
+    ```
+
+    More of the list, but this one doesn't close properly:
+    ```{r}
+    c
+  ```
+    So the block continues through the next code chunk
+    ```{r}
+    a
+    ```
+The end.

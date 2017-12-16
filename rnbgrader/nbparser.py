@@ -19,9 +19,10 @@ def read_file(file_ish, encoding='utf8'):
 
 class Chunk(object):
 
-    def __init__(self, code, language, classes=(), options='', id='', kvs=None):
-        self.language = language
+    def __init__(self, code, language, line, classes=(), options='', id='', kvs=None):
         self.code = code
+        self.language = language
+        self.line = line
         self.classes = tuple(classes)
         self.id = id
         self.kvs = {} if kvs is None else kvs
@@ -30,25 +31,28 @@ class Chunk(object):
         return self.__dict__ == other.__dict__
 
 
-RMD_HEADER_RE = re.compile(r'^\s*```{(\w+)(?:[, ]*)(.*?)}\s*$')
+RMD_HEADER_RE = re.compile(r'^(\s*)```{(\w+)(?:[, ]*)(.*?)}\s*$')
 
 
 def _get_chunks(nb_str):
     state = 'markdown'
     chunks = []
-    for line in nb_str.splitlines(keepends=True):
+    for line_no, line in enumerate(nb_str.splitlines(keepends=True)):
         if state == 'markdown':
             match = RMD_HEADER_RE.match(line)
             if match is not None:
-                language, options = match.groups()
+                indent, language, options = match.groups()
+                start_line = line_no + 2
                 state = 'chunk'
                 code = []
             continue
         elif state == 'chunk':
-            if line.strip() != '```':
+            if line.rstrip() != indent + '```':
+                if line.startswith(indent):
+                    line = line[len(indent):]
                 code.append(line)
                 continue
-            chunks.append(Chunk(''.join(code), language))
+            chunks.append(Chunk(''.join(code), language, start_line))
             state = 'markdown'
     return chunks
 
