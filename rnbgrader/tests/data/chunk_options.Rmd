@@ -9,12 +9,12 @@ b = 3
 ```
 Text continues again.
 ```{r }
-a = 1
-a
+c = 5
+c
 ```
 Text is resolute.
 ```{python echo=FALSE}
-p = 1
+p = 10
 p
 ```
 Text ends.
