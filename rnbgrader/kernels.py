@@ -11,8 +11,11 @@ http://jupyter-client.readthedocs.io/en/stable/index.html
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import io
+from base64 import decodebytes
 from queue import Empty
 
+from PIL import Image
 from jupyter_client.manager import start_new_kernel
 
 DEFAULT_TIMEOUT = 15
@@ -24,7 +27,7 @@ class JupyterKernel(object):
     Examples
     --------
     >>> kernel = JupyterKernel("ir")
-    >>> reply, outputs = kernel.run_code('a = 1')
+    >>> reply, outputs = kernel.raw_run('a = 1')
     """
 
     def __init__(self, kernel_name, timeout=DEFAULT_TIMEOUT):
@@ -58,7 +61,7 @@ class JupyterKernel(object):
                 except Empty:
                     break
 
-    def run_code(self, code, timeout=None,
+    def raw_run(self, code, timeout=None,
                  silent=False, store_history=True,
                  stop_on_error=True):
         """ Run code string, return reply and other output messages
@@ -108,3 +111,58 @@ class JupyterKernel(object):
             output_msgs.append(msg)
 
         return reply, output_msgs
+
+    def _process_output(self, msg):
+        if msg['msg_type'] == 'error':
+            return dict(type='error',
+                        message=msg,
+                        content=msg['content']['evalue'])
+        data = msg['content']['data']
+        if msg['msg_type'] != 'display_data':
+            raise RuntimeError("Don't recognize message type " +
+                               msg['msg_type'])
+        if 'image/png' in data:
+            img_bytes = decodebytes(data['image/png'].encode('ascii'))
+            png = Image.open(io.BytesIO(img_bytes))
+            return dict(type='image',
+                        message=msg,
+                        content=png)
+        if 'text/markdown' in data:
+            return dict(type='text',
+                        message=msg,
+                        content=data['text/markdown'])
+        raise RuntimeError("Don't recognize data {}".format(data))
+
+    def run_code(self, code, timeout=None,
+                 silent=False, store_history=True,
+                 stop_on_error=True):
+        """ Run code string, return list of processed results
+
+        Parameters
+        ----------
+        code : str
+            A string of code in the kernel's language.
+        timeout : None or float, optional
+            Timeout in seconds.  If None, use default timeout.
+        silent : bool, optional (default False)
+            If set, the kernel will execute the code as quietly possible, and
+            will force store_history to be False.
+        store_history : bool, optional
+            If set, the kernel will store command history.  This is forced
+            to be False if silent is True.
+        stop_on_error: bool, optional (default True)
+            Flag whether to abort the execution queue, if an exception is encountered.
+
+        Returns
+        -------
+        outputs : list
+            List of output dictionaries, one per output.  The outputs have been
+            processed to convert mime types to text, images.
+        """
+        reply, output_msgs = self.raw_run(code, timeout, silent, store_history,
+                                          stop_on_error)
+        assert reply['header']['msg_type'] == 'execute_reply'
+        return [self._process_output(msg) for msg in output_msgs]
+
+    def clear(self):
+        self.run_code('rm(list = ls())')
