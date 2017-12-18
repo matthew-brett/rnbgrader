@@ -4,7 +4,7 @@
 from os.path import dirname, join as pjoin
 from glob import glob
 
-from rnbgrader.nbparser import (read_file, load, loads, RMD_HEADER_RE)
+from rnbgrader.nbparser import (read_file, load, loads, RMD_HEADER_RE, Chunk)
 
 
 DATA_DIR = pjoin(dirname(__file__), 'data')
@@ -52,6 +52,19 @@ def test_chunks():
         nb = load(fname)
         assert (tuple((c.language, c.code, c.line_no) for c in nb.chunks) ==
                 nb_def['chunk_defs'])
+
+
+def test_chunk():
+    chunk = Chunk('a = 1', 'python', 10)
+    assert chunk.code == 'a = 1'
+    assert chunk.language == 'python'
+    assert chunk.line_no == 10
+    assert chunk.classes == ()
+    assert chunk.options == ''
+    assert chunk.id == ''
+    assert chunk.kvs == {}
+    chunk2 = Chunk('a = 1', 'python', 10, (), '', '', {})
+    assert chunk == chunk2
 
 
 def test_rmd_header_re():

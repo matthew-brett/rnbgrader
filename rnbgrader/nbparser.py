@@ -19,11 +19,13 @@ def read_file(file_ish, encoding='utf8'):
 
 class Chunk(object):
 
-    def __init__(self, code, language, line_no, classes=(), options='', id='', kvs=None):
+    def __init__(self, code, language, line_no, classes=(), options='', id='',
+                 kvs=None):
         self.code = code
         self.language = language
         self.line_no = line_no
         self.classes = tuple(classes)
+        self.options = options
         self.id = id
         self.kvs = {} if kvs is None else kvs
 
@@ -34,7 +36,7 @@ class Chunk(object):
 RMD_HEADER_RE = re.compile(r'^(\s*)```{(\w+)(?:[, ]*)(.*?)}\s*$')
 
 
-def _get_chunks(nb_str):
+def _parse_chunks(nb_str):
     state = 'markdown'
     chunks = []
     for line_no, line in enumerate(nb_str.splitlines(keepends=True)):
@@ -67,10 +69,10 @@ class RNotebook(object):
         """ Initialize object from string `nb_str`
         """
         self.nb_str = nb_str
-        self._chunks = tuple(self._get_chunks())
+        self._chunks = tuple(self._parse_chunks())
 
-    def _get_chunks(self):
-        return _get_chunks(self.nb_str)
+    def _parse_chunks(self):
+        return _parse_chunks(self.nb_str)
 
     @property
     def chunks(self):
