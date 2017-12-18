@@ -175,3 +175,10 @@ class JupyterKernel(object):
 
     def clear(self):
         self.run_code('rm(list = ls())')
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.shutdown()
+        return False
