@@ -136,10 +136,6 @@ class JupyterKernel(object):
             return dict(type='image',
                         message=msg,
                         content=png)
-        if 'text/markdown' in data:
-            return dict(type='text',
-                        message=msg,
-                        content=data['text/markdown'])
         if 'text/plain' in data:
             return dict(type='text',
                         message=msg,
