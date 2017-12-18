@@ -31,7 +31,7 @@ class JupyterKernel(object):
     >>> len(outputs)
     1
     >>> outputs[0]['content']
-    '1'
+    '[1] 1'
     """
 
     def __init__(self, kernel_name, timeout=DEFAULT_TIMEOUT):
