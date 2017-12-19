@@ -49,5 +49,6 @@ def test_max_multi():
     assert max_multi([[2, 1, 4], [4, 3, 6]]) == 4 + 6
     # NaNs treated as zero
     assert max_multi([[2, np.nan, 4], [np.nan, 3, 6]]) == 4 + 6
+    assert max_multi([[np.nan, np.nan, np.nan], [np.nan, 3, 6]]) == 0 + 6
     assert max_multi(np.ones((4, 4))) == 4
     assert max_multi(np.ones((4, 4)) + np.nan) == 0

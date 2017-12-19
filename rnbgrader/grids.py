@@ -48,6 +48,8 @@ def full_grid(answers, evaluated_chunks):
 def max_multi(grid):
     """ Allow any evaluated chunk as answer to any question
 
+    Treat NaN values as zero.
+
     Parameters
     ----------
     grid : ndarray shape (N, P)
@@ -60,4 +62,7 @@ def max_multi(grid):
         Score, that is the sum over answers of the maximum mark for each
         answer, over evaluated chunks.
     """
-    return np.nansum(np.nanmax(grid, axis=1))
+    # Treat NaNs as zeros.  Nansum will also do this for numpy >= 1.9
+    grid = np.array(grid)
+    grid[np.isnan(grid)] = 0
+    return np.sum(np.max(grid, axis=1))
