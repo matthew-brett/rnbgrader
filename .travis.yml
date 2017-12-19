@@ -8,8 +8,9 @@ cache:
 
 env:
     global:
-        # Depends also on jupyter_client, but this must be installed earlier
-        - DEPENDS="numpy jupyter_client"
+        # tornado is a dependency of jupyter_client - see:
+        # https://github.com/jupyter/jupyter_client/issues/321
+        - DEPENDS="numpy jupyter_client tornado"
         - PKG_NAME=rnbgrader
         - INSTALL_TYPE="pip"
         # URL for extra wheel repo
