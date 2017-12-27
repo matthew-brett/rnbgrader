@@ -45,20 +45,20 @@ class JupyterKernel(object):
         timeout : float, optional
             Default timeout in seconds.
         """
-        self.km, self.kc = start_new_kernel(kernel_name=kernel_name)
+        self._km, self._kc = start_new_kernel(kernel_name=kernel_name)
         self.timeout = timeout
 
     def shutdown(self):
         """ Shutdown the kernel """
-        self.kc.stop_channels()
-        self.km.shutdown_kernel()
+        self._kc.stop_channels()
+        self._km.shutdown_kernel()
 
     def __del__(self):
         self.shutdown()
 
     def flush_channels(self):
         """ Flush all kernel channels """
-        for channel in (self.kc.shell_channel, self.kc.iopub_channel):
+        for channel in (self._kc.shell_channel, self._kc.iopub_channel):
             while True:
                 try:
                     channel.get_msg(block=True, timeout=0.1)
@@ -94,18 +94,20 @@ class JupyterKernel(object):
         """
         timeout = self.timeout if timeout is None else timeout
 
-        msg_id = self.kc.execute(code=code, silent=silent,
-                                 store_history=store_history,
-                                 stop_on_error=stop_on_error)
+        kc = self._kc
 
-        reply = self.kc.get_shell_msg(timeout=timeout)
+        msg_id = kc.execute(code=code, silent=silent,
+                            store_history=store_history,
+                            stop_on_error=stop_on_error)
 
-        busy_msg = self.kc.iopub_channel.get_msg(timeout=1)
+        reply = kc.get_shell_msg(timeout=timeout)
+
+        busy_msg = kc.iopub_channel.get_msg(timeout=1)
         assert busy_msg['content']['execution_state'] == 'busy'
 
         output_msgs = []
         while True:
-            msg = self.kc.iopub_channel.get_msg(timeout=0.1)
+            msg = kc.iopub_channel.get_msg(timeout=0.1)
             if msg['msg_type'] == 'status':
                 assert msg['content']['execution_state'] == 'idle'
                 break
