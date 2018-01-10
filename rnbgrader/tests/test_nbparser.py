@@ -67,6 +67,9 @@ def test_chunk():
     assert chunk.kvs == {}
     chunk2 = Chunk('a = 1', 'python', 10, None, (), '', '', {})
     assert chunk == chunk2
+    chunk3 = Chunk('a = 1', 'python', 10, 13, (), '', '', {})
+    assert chunk3.code == 'a = 1'
+    assert chunk3.end_line == 13
 
 
 def test_rmd_header_re():

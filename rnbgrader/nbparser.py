@@ -30,7 +30,8 @@ class Chunk(object):
         self.language = language
         # line numbers are 0-based.
         self.start_line = start_line
-        self.end_line = start_line + len(code.splitlines()) - 1
+        self.end_line = (start_line + len(code.splitlines()) - 1
+                         if end_line is None else end_line)
         self.classes = tuple(classes)
         self.options = options
         self.id = id
