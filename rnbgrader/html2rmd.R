@@ -14,7 +14,7 @@ fname <- args[1]
 root = str_match(fname, regex("(.*).nb.html", ignore_case=TRUE))[2]
 if (is.na(root)) {
     cat(sprintf("Filename '%s' should end in '.nb.html'\n", fname))
-    next
+    quit(1)
 }
 if (length(args) == 2) {
     out_fname = args[2]
@@ -22,8 +22,8 @@ if (length(args) == 2) {
     out_fname = paste(root, '.Rmd', sep='')
 }
 
+# http://rmarkdown.rstudio.com/r_notebook_format.html
 parsed <- rmarkdown::parse_html_notebook(fname)
-out_fname = paste(root, '.Rmd', sep='')
 cat(sprintf("Writing '%s' to '%s'\n", fname, out_fname))
 f = file(out_fname)
 write(parsed$rmd, f)
