@@ -6,6 +6,8 @@ import numpy as np
 from rnbgrader.chunkrunner import EvaluatedChunk
 from rnbgrader.grids import full_grid, max_multi
 
+from numpy.testing import assert_array_equal
+
 
 def test_full_grid():
     # Test calculation of grid from results, answers. An answer returns marks
@@ -43,12 +45,13 @@ def test_full_grid():
 
 
 def test_max_multi():
-    assert max_multi([[1, 2], [3, 4]]) == 2 + 4
-    assert max_multi([[2, 1], [4, 3]]) == 2 + 4
+    assert_array_equal(max_multi([[1, 2], [3, 4]]), [2, 4])
+    assert_array_equal(max_multi([[2, 1], [4, 3]]), [2, 4])
     # Same chunk gives max score on two questions.
-    assert max_multi([[2, 1, 4], [4, 3, 6]]) == 4 + 6
+    assert_array_equal(max_multi([[2, 1, 4], [4, 3, 6]]), [4, 6])
     # NaNs treated as zero
-    assert max_multi([[2, np.nan, 4], [np.nan, 3, 6]]) == 4 + 6
-    assert max_multi([[np.nan, np.nan, np.nan], [np.nan, 3, 6]]) == 0 + 6
-    assert max_multi(np.ones((4, 4))) == 4
-    assert max_multi(np.ones((4, 4)) + np.nan) == 0
+    assert_array_equal(max_multi([[2, np.nan, 4], [np.nan, 3, 6]]), [4, 6])
+    assert_array_equal(max_multi([[np.nan, np.nan, np.nan], [np.nan, 3, 6]]),
+                       [0, 6])
+    assert_array_equal(max_multi(np.ones((4, 4))), np.ones((4,)))
+    assert_array_equal(max_multi(np.ones((4, 4)) + np.nan), np.zeros((4,)))

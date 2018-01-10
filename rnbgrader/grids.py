@@ -58,11 +58,11 @@ def max_multi(grid):
 
     Returns
     -------
-    score : float
-        Score, that is the sum over answers of the maximum mark for each
-        answer, over evaluated chunks.
+    scores : array shape(N,) of float
+        Scores, that are scores for the chunks giving maximum score for each
+        answer.
     """
     # Treat NaNs as zeros.  Nansum will also do this for numpy >= 1.9
     grid = np.array(grid)
     grid[np.isnan(grid)] = 0
-    return np.sum(np.max(grid, axis=1))
+    return np.max(grid, axis=1)
