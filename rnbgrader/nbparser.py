@@ -19,11 +19,18 @@ def read_file(file_ish, encoding='utf8'):
 
 class Chunk(object):
 
-    def __init__(self, code, language, line_no, classes=(), options='', id='',
+    def __init__(self, code, language,
+                 start_line,
+                 end_line=None,
+                 classes=(),
+                 options='',
+                 id='',
                  kvs=None):
         self.code = code
         self.language = language
-        self.line_no = line_no
+        # line numbers are 0-based.
+        self.start_line = start_line
+        self.end_line = start_line + len(code.splitlines()) - 1
         self.classes = tuple(classes)
         self.options = options
         self.id = id
@@ -44,7 +51,7 @@ def _parse_chunks(nb_str):
             match = RMD_HEADER_RE.match(line)
             if match is not None:
                 indent, language, options = match.groups()
-                start_line = line_no + 2
+                start_line = line_no + 1
                 state = 'chunk'
                 code = []
             continue
@@ -54,7 +61,10 @@ def _parse_chunks(nb_str):
                     line = line[len(indent):]
                 code.append(line)
                 continue
-            chunks.append(Chunk(''.join(code), language, start_line))
+            chunks.append(Chunk(''.join(code),
+                                language,
+                                start_line,
+                                line_no -1))
             state = 'markdown'
     return chunks
 

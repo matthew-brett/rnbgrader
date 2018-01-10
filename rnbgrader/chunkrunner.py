@@ -85,7 +85,7 @@ class ChunkRunner(object):
 
     def _report_errors(self, chunk, errors):
         return 'Errors for chunk at line no {}:\n----{}\n---\n{}\n'.format(
-            chunk.line_no,
+            chunk.start_line + 1,
             chunk.code,
             'Error:\n{}'.join(e['content'] for e in errors))
 

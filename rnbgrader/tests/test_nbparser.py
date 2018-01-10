@@ -9,20 +9,20 @@ from rnbgrader.nbparser import (read_file, load, loads, RMD_HEADER_RE, Chunk)
 
 DATA_DIR = pjoin(dirname(__file__), 'data')
 NB_DEFS = [dict(name='default',
-                chunk_defs=(('r', 'plot(cars)\n', 11),
+                chunk_defs=(('r', 'plot(cars)\n', 10, 10),
                            )),
            dict(name='chunk_options',
-                chunk_defs=(('r', 'a = 1\na\n', 3),
-                            ('r', 'c = 5\nc\n', 12),
-                            ('python', 'p = 10\np\n', 17),
+                chunk_defs=(('r', 'a = 1\na\n', 2, 3),
+                            ('r', 'c = 5\nc\n', 11, 12),
+                            ('python', 'p = 10\np\n', 16, 17),
                            )),
            dict(name='list_chunk',
-                chunk_defs=(('r', 'a = 1\na\n', 6),
-                            ('r', 'b = 2\nb\n', 15),
-                            ('r', 'c = 3\n  c\n', 21),
+                chunk_defs=(('r', 'a = 1\na\n', 5, 6),
+                            ('r', 'b = 2\nb\n', 14, 15),
+                            ('r', 'c = 3\n  c\n', 20, 21),
                             ('r', 'c\n'
                              '  ```\nSo the block continues '
-                             'through the next code chunk\n```{r}\na\n', 27)
+                             'through the next code chunk\n```{r}\na\n', 26, 30)
                            )),
           ]
 NB_DEFAULT = pjoin(DATA_DIR, 'default.Rmd')
@@ -50,20 +50,22 @@ def test_chunks():
     for nb_def in NB_DEFS:
         fname = pjoin(DATA_DIR, nb_def['name'] + '.Rmd')
         nb = load(fname)
-        assert (tuple((c.language, c.code, c.line_no) for c in nb.chunks) ==
-                nb_def['chunk_defs'])
+        assert (tuple(
+            (c.language, c.code, c.start_line, c.end_line) for c in nb.chunks)
+            == nb_def['chunk_defs'])
 
 
 def test_chunk():
     chunk = Chunk('a = 1', 'python', 10)
     assert chunk.code == 'a = 1'
     assert chunk.language == 'python'
-    assert chunk.line_no == 10
+    assert chunk.start_line == 10
+    assert chunk.end_line == 10
     assert chunk.classes == ()
     assert chunk.options == ''
     assert chunk.id == ''
     assert chunk.kvs == {}
-    chunk2 = Chunk('a = 1', 'python', 10, (), '', '', {})
+    chunk2 = Chunk('a = 1', 'python', 10, None, (), '', '', {})
     assert chunk == chunk2
 
 
