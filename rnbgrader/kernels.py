@@ -50,6 +50,9 @@ class JupyterKernel(object):
 
     def shutdown(self):
         """ Shutdown the kernel """
+        # Object may have broken during initialization, no _km, _kc
+        if not hasattr(self, '_kc'):
+            return
         self._kc.stop_channels()
         self._km.shutdown_kernel()
 
