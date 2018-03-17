@@ -8,12 +8,27 @@ Extract code chunks from notebook.
 import re
 
 
-def read_file(file_ish, encoding='utf8'):
+def read_file(file_ish, encoding='utf8', errors='replace'):
     """ Read and return string contents in `file_ish`
+
+    Parameters
+    ----------
+    file_ish : str or file-like
+        String giving filename or file-like object implementing ``read``
+        method.
+    encoding : str
+        Text encoding of file, default ``utf8``.
+    errors : str
+        Mode for encoding errors. See ``codec.Codec`` for a list.
+
+    Returns
+    -------
+    contents : str
+        Read, decoded contents of `file_ish`.
     """
     if hasattr(file_ish, 'read'):
         return file_ish.read()
-    with open(file_ish, 'rt', encoding=encoding) as fobj:
+    with open(file_ish, 'rt', encoding=encoding, errors=errors) as fobj:
         return fobj.read()
 
 
