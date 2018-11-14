@@ -1,11 +1,18 @@
-###################
-RNBGrader Changelog
-###################
+.. -*- mode: rst -*-
+.. vim:ft=rst
 
-***
-0.1
-***
+.. _changelog:
 
-First release.
+####################
+rnbgrader change log
+####################
 
-.. vim: ft=rst
+`Matthew Brett` (MB) wrote the code.
+
+********
+Releases
+********
+
+* 0.1 (Wednesday November 14 2018)
+
+  First public release
