@@ -57,6 +57,7 @@ setup(name='rnbgrader',
           'Operating System :: MacOS',
         ],
       long_description = open('README.rst', 'rt').read(),
+      install_requires = install_requires,
       extras_require = {'test': test_requires},
       # For pip versions >= 9
       python_requires = '>=3.4'
