@@ -9,7 +9,6 @@ Quickstart
 **********
 
 See the tests for examples.
-projects.
 
 ************
 Installation
