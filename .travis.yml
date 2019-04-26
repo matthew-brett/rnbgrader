@@ -31,7 +31,7 @@ matrix:
     # Also need minimums for Pillow
     - python: 3.6
       env:
-        - DEPENDS="numpy==1.11.3 jupyter_client==5.0.0"
+        - DEPENDS="numpy==1.12.0 jupyter_client==5.0.0"
     # Check also requirements.txt
     - python: 3.6
       env:
