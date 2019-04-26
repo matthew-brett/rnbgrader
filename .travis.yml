@@ -17,40 +17,39 @@ env:
         - EXTRA_WHEELS="https://5cf40426d9f06eb7461d-6fe47d9331aba7cd62fc36c7196769e4.ssl.cf2.rackcdn.com"
 
 python:
-    - 3.4
-    - 3.5
     - 3.6
+    - 3.7
 
 matrix:
   include:
-    - python: 3.5
+    - python: 3.6
       env:
         - COVERAGE=1
         - DOCTESTS=1
     # Add absolute minimum dependencies
     # Also need minimums for Pillow
-    - python: 3.4
+    - python: 3.6
       env:
-        - DEPENDS="numpy==1.7.1 jupyter_client==5.0.0"
+        - DEPENDS="numpy==1.11.3 jupyter_client==5.0.0"
     # Check also requirements.txt
-    - python: 3.5
+    - python: 3.6
       env:
         - INSTALL_TYPE=setup
-    - python: 3.5
+    - python: 3.6
       env:
         - INSTALL_TYPE=sdist
-    - python: 3.5
+    - python: 3.6
       env:
         - INSTALL_TYPE=wheel
-    - python: 3.5
+    - python: 3.6
       env:
         - INSTALL_TYPE=requirements
         - DEPENDS=
-    - python: 3.5
+    - python: 3.6
       env:
         - BUILD_DOC=1
     # Test pre-release versions of everything
-    - python: 3.5
+    - python: 3.6
       env:
         - EXTRA_PIP_FLAGS="--pre"
 
@@ -73,6 +72,8 @@ before_install:
     - python -m pip install --upgrade pip wheel
     - python --version  # just to check
     - pip install pytest # always
+    # Extra test dependency
+    - pip install git+https://github.com/matthew-brett/gradools.git
     - if [ -n "$DEPENDS" ]; then
         pip install $EXTRA_PIP_FLAGS -f $EXTRA_WHEELS $DEPENDS;
       fi

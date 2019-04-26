@@ -1,6 +1,6 @@
 # Minimum requirements
 #
-numpy>=1.7.1
+numpy>=1.11.3
 Pillow
 pypandoc
 jupyter_client>=5.0.0
