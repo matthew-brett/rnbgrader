@@ -16,7 +16,7 @@ Show the number of rows and columns:
 ```{r}
 #- Use "dim" to show the number of rows and columns of the "cars"
 #- data frame.
-#- 5 marks / 40 (total 5 so far).
+#- 5 marks / 50 (total 5 so far).
 dim(cars)
 ```
 
@@ -24,7 +24,7 @@ Show the structure of the `cars` data frame:
 
 ```{r}
 #- Show the structure of the cars data frame
-#- 5 marks / 40 (total 10 so far).
+#- 5 marks / 50 (total 10 so far).
 str(cars)
 ```
 
@@ -32,14 +32,15 @@ Show the first 6 cars (rows) in the data frame using the `head` function:
 
 ```{r}
 #- Show the first 6 cars with the "head" function.
-#- 5 marks / 40 (total 15 so far).
+#- 5 marks / 50 (total 15 so far).
 head(cars)
 ```
 
+Show a histogram of the `speed` column of the `cars` data frame:
 
 ```{r}
 #- Do a histogram of the speeks
-#- 10 marks / 40 (total 25 so far).
+#- 10 marks / 50 (total 25 so far).
 hist(cars$speed)
 ```
 
@@ -47,7 +48,7 @@ Use the `table` function to the counts of the various speeds.
 
 ```{r}
 #- Use "table" to show the counts of cars with each speed value.
-#- 5 marks / 40 (total 30 so far).
+#- 5 marks / 50 (total 30 so far).
 table(cars$speed)
 ```
 
@@ -57,9 +58,17 @@ Make a new data frame containing the rows with speeds less than 15:
 #- Make a new data frame called "fast" containing only the cars
 #- with speeds greater than 15.  Use the subset command.
 #- Then, use "head" to check that you have cars faster than 15.
-#- 10 marks / 40 (total 40 so far).
+#- 10 marks / 50 (total 40 so far).
 fast <- subset(cars, cars$speed > 15)
 head(fast)
+```
+
+Finally, do a histogram of the `dist` column of the `fast` data frame:
+
+```{r}
+#- Do a histogram of the speeks
+#- 10 marks / 50 (total 50 so far).
+hist(fast$dist)
 ```
 
 That's it.

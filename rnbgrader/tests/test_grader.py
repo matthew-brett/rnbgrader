@@ -11,10 +11,10 @@ from glob import glob
 from rnbgrader import JupyterKernel
 from rnbgrader.grader import (OPTIONAL_PROMPT, NBRunner, report, duplicates,
                               CanvasGrader, assert_answers_only,
-                              RegexAnswer, ImgAnswer, raw2regex)
+                              RegexAnswer, ImgAnswer, raw2regex,
+                              RawRegexAnswer)
 
 import pytest
-from unittest.mock import patch
 
 from gradools.canvastools import CanvasError
 
@@ -92,10 +92,9 @@ class CarsGrader(CanvasGrader):
 
     solution_rmds = (pjoin(DATA, 'solution.Rmd'),)
     standard_box = (44, 81, 800, 770)
-    total = 40
+    total = 50
 
     def make_answers(self):
-        solution = self.solutions[0]
         solution_dir = self.solution_dirs[0]
 
         self._chk_answer(RegexAnswer(
@@ -126,7 +125,7 @@ class CarsGrader(CanvasGrader):
         raw = """
             4  7  8  9 10 11 12 13 14 15 16 17 18 19 20 22 23 24 25 
             2  2  1  1  3  2  4  4  4  3  2  3  4  3  5  1  1  4  1"""
-        self._chk_answer(RegexAnswer(5, raw2regex(raw)), 5)
+        self._chk_answer(RawRegexAnswer(5, raw), 5)
 
         raw = """
         speed dist
@@ -137,6 +136,9 @@ class CarsGrader(CanvasGrader):
         31    17   50
         32    18   42"""
         self._chk_answer(RegexAnswer(10, raw2regex(raw)), 6)
+
+        self._chk_img_answer(10, 7)
+
         return self._answers
 
 
@@ -151,13 +153,13 @@ def test_raw2regex():
 
 def test_solution():
     assert sum(CARS_GRADER.grade_notebook(
-        pjoin(DATA, 'solution.Rmd'))) == 40
+        pjoin(DATA, 'solution.Rmd'))) == 50
 
 
 def test_bit_bad():
     # This one has a couple of wrong answers
     assert sum(CARS_GRADER.grade_notebook(
-        pjoin(DATA, 'not_solution.Rmd'))) == 25
+        pjoin(DATA, 'not_solution.Rmd'))) == 35
 
 
 def test_grade_all_error():

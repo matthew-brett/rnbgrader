@@ -180,9 +180,19 @@ class Grader:
     def reset_answers(self):
         self._answers = []
 
-    def _chk_answer(self, answer, sol_chunk_no):
-        assert_answers_only(answer, sol_chunk_no, self.solutions[0])
+    def _chk_answer(self, answer, sol_chunk_no, solution_no=0):
+        assert_answers_only(answer, sol_chunk_no,
+                            self.solutions[solution_no])
         self._answers.append(answer)
+
+    def _chk_img_answer(self, points, sol_chunk_no, solution_no=0):
+        soln_dir = self.solution_dirs[solution_no]
+        self._chk_answer(
+            ImgAnswer(points,
+                      pjoin(soln_dir, f'chunk-{sol_chunk_no}_item-0.png'),
+                      self.standard_box),
+            sol_chunk_no,
+            solution_no)
 
     @property
     def solutions(self):
@@ -383,6 +393,12 @@ class RegexAnswer(TextAnswer):
 
     def _test(self, source):
         return self.regex.search(source)
+
+
+class RawRegexAnswer(RegexAnswer):
+
+    def __init__(self, mark, target, flags=0):
+        super().__init__(mark, raw2regex(target), flags)
 
 
 class ImgAnswer(AnyAnswer):
