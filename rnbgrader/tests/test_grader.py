@@ -1,7 +1,6 @@
 """ Test grader module
 """
 
-import sys
 from os.path import join as pjoin, dirname
 import io
 import re
@@ -10,9 +9,8 @@ from glob import glob
 
 from rnbgrader import JupyterKernel
 from rnbgrader.grader import (OPTIONAL_PROMPT, NBRunner, report, duplicates,
-                              CanvasGrader, assert_answers_only,
-                              RegexAnswer, ImgAnswer, raw2regex,
-                              RawRegexAnswer)
+                              CanvasGrader, RegexAnswer, ImgAnswer, raw2regex,
+                              RawRegexAnswer, NotebookError)
 
 import pytest
 
@@ -176,3 +174,25 @@ def test_check_names():
     args = ["check-names", pjoin(DATA, "test_submissions")]
     with pytest.raises(CanvasError):
         CARS_GRADER.main(args)
+
+
+def test_error_report():
+    nb = io.StringIO("""
+
+Some text.
+
+```{r}
+a <- 1
+a
+```
+
+More text.
+
+```{r}
+b
+```
+""")
+    runner = NBRunner('some_var')
+    with pytest.raises(NotebookError):
+        with JupyterKernel('ir') as rk:
+            runner.run(nb, rk)

@@ -59,7 +59,7 @@ class NBRunner:
         results = runner.results
         if runner.outcome != 'ok':
             raise NotebookError(
-                f'Error running {fname}:\n{report_results(results)}')
+                f'Error running {fname}:\n{report(results)}')
         return results
 
 
