@@ -15,7 +15,7 @@ import numpy as np
 
 from PIL import Image
 
-from rnbgrader import load, JupyterKernel, ChunkRunner
+from rnbgrader import load as nb_load, JupyterKernel, ChunkRunner
 from rnbgrader.grids import full_grid, max_multi
 
 
@@ -45,7 +45,7 @@ class NBRunner:
         return chunks
 
     def get_chunks(self, fname):
-        nb = load(fname)
+        nb = nb_load(fname)
         return self.process_chunks(nb.chunks)
 
     def run(self, fname, rk):
