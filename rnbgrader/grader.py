@@ -180,17 +180,24 @@ class Grader:
     def reset_answers(self):
         self._answers = []
 
+    def add_answer(self, answer):
+        self._answers.append(answer)
+
     def _chk_answer(self, answer, sol_chunk_no, solution_no=0):
         assert_answers_only(answer, sol_chunk_no,
                             self.solutions[solution_no])
-        self._answers.append(answer)
+        self.add_answer(answer)
+
+    def _get_img_answer(self, points, sol_chunk_no, solution_no=0):
+        soln_dir = self.solution_dirs[solution_no]
+        return ImgAnswer(
+            points,
+            pjoin(soln_dir, f'chunk-{sol_chunk_no}_item-0.png'),
+            self.standard_box)
 
     def _chk_img_answer(self, points, sol_chunk_no, solution_no=0):
-        soln_dir = self.solution_dirs[solution_no]
         self._chk_answer(
-            ImgAnswer(points,
-                      pjoin(soln_dir, f'chunk-{sol_chunk_no}_item-0.png'),
-                      self.standard_box),
+            self._get_img_answer(points, sol_chunk_no, solution_no),
             sol_chunk_no,
             solution_no)
 
@@ -203,7 +210,7 @@ class Grader:
         return [snb.out_dir for snb in self._solution_nbs]
 
     def make_answers(self):
-        # Return answers
+        # Optionally, return answers
         return []
 
     def check_answers(self, answers):
@@ -214,7 +221,8 @@ class Grader:
 
     def make_check_answers(self):
         self.reset_answers()
-        answers = self.make_answers()
+        res = self.make_answers()
+        answers = self._answers if res is None else res
         self.check_answers(answers)
         return answers
 
