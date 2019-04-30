@@ -76,16 +76,15 @@ def report(results):
 
 class CachedBuiltNotebook:
 
-    def __init__(self, notebook_fname, runner, out_dir=None,
+    def __init__(self, notebook_fname, runner, cache_dir=None,
                  timeout=30):
         self.notebook_fname = abspath(notebook_fname)
         self.runner = runner
-        if out_dir is None:
-            self._tmp = TemporaryDirectory(
-                basename(self.notebook_fname) + '.built')
-            self.out_dir = self._tmp.name
-        else:
-            self.out_dir = abspath(out_dir)
+        if cache_dir is None:
+            self._tmp = TemporaryDirectory()
+            cache_dir = self._tmp.name
+        self.out_dir = pjoin(abspath(cache_dir),
+                             basename(self.notebook_fname) + '.built')
         self.timeout = timeout
         self.pkl_fname = pjoin(self.out_dir, 'solution.pkl')
         self._solution = None
@@ -172,6 +171,7 @@ class Grader:
         self.runner = self.run_cls(self.subtract_var_name)
         self._solution_nbs = tuple(
             self.cacher(nb, self.runner) for nb in self.solution_rmds)
+        self.rebuild()
 
     def rebuild(self):
         for snb in self._solution_nbs:
