@@ -4,19 +4,17 @@
 from os import makedirs
 from os.path import (exists, join as pjoin, splitext, abspath, isdir, basename)
 import pickle
-import re
 from argparse import ArgumentParser
 from glob import glob
 from collections import defaultdict
 from hashlib import sha1
 from tempfile import TemporaryDirectory
 
-import numpy as np
-
-from PIL import Image
+import pandas as pd
 
 from rnbgrader import load as nb_load, JupyterKernel, ChunkRunner
 from rnbgrader.grids import full_grid, max_multi
+from rnbgrader.answers import ImgAnswer
 
 
 OPTIONAL_PROMPT = r'^\s*(?:\[\d+\] )?'
@@ -122,42 +120,6 @@ def print_solution(solution):
         print(f'{i}\n{s.chunk.code}\n{content}\n')
 
 
-_char_map = {40: '\\(',
-             41: '\\)',
-             91: '\\[',
-             93: '\\]',
-             123: '\\{',
-             125: '\\}',
-             63: '\\?',
-             42: '\\*',
-             43: '\\+',
-             45: '\\-',
-             124: '\\|',
-             94: '\\^',
-             36: '\\$',
-             92: '\\\\',
-             46: '\\.',
-             38: '\\&',
-             126: '\\~',
-             35: '\\#',
-             11: '\\\x0b',
-             12: '\\\x0c'}
-
-
-def raw2regex(literal):
-    out = literal.translate(_char_map)
-    # Space at beginning of lines is optional
-    out = re.sub(r'^\s+', r'', out, flags=re.M)
-    out = re.sub('^', r'\\s*', out, flags=re.M)
-    # Space at end of lines is optional
-    out = re.sub(r'\s+$', r'', out, flags=re.M)
-    out = re.sub('$', r'\\s*', out, flags=re.M)
-    # Newlines, Windows and Unix
-    out = re.sub('\n', r'(?:\\n|\\r\\n?)', out)
-    # Make whitespace match general for type, amount.
-    return re.sub(r'\s+', r'\\s+', out)
-
-
 class Grader:
 
     solution_rmds = ()
@@ -183,21 +145,26 @@ class Grader:
     def add_answer(self, answer):
         self._answers.append(answer)
 
+    @property
+    def answers(self):
+        return self._answers
+
     def _chk_answer(self, answer, sol_chunk_no, solution_no=0):
         assert_answers_only(answer, sol_chunk_no,
                             self.solutions[solution_no])
         self.add_answer(answer)
 
-    def _get_img_answer(self, points, sol_chunk_no, solution_no=0):
+    def _get_img_answer(self, points, sol_chunk_no, solution_no=0, *, name=None):
         soln_dir = self.solution_dirs[solution_no]
         return ImgAnswer(
             points,
             pjoin(soln_dir, f'chunk-{sol_chunk_no}_item-0.png'),
-            self.standard_box)
+            self.standard_box,
+            name=name)
 
-    def _chk_img_answer(self, points, sol_chunk_no, solution_no=0):
+    def _chk_img_answer(self, points, sol_chunk_no, solution_no=0, *, name=None):
         self._chk_answer(
-            self._get_img_answer(points, sol_chunk_no, solution_no),
+            self._get_img_answer(points, sol_chunk_no, solution_no, name=name),
             sol_chunk_no,
             solution_no)
 
@@ -214,8 +181,8 @@ class Grader:
         return []
 
     def check_answers(self, answers):
-        # Check that crude score algorithm gives correct total for first
-        # solution
+        """ Crude score algorithm gives correct total for first solution
+        """
         grid = full_grid(answers, self.solutions[0])
         assert sum(max_multi(grid)) == self.total
 
@@ -244,7 +211,9 @@ class Grader:
             # Stuff put in by me with patching
             extra = float(result[0]['content'].split()[1])
         grid = full_grid(answers, ev_chunks)
-        return list(max_multi(grid)) + [extra]
+        names = [a.name if a.name else 'unnamed' for a in answers]
+        names.append('adjustments')
+        return pd.Series(list(max_multi(grid)) + [extra], names)
 
     def grade_all_notebooks(self, submission_dir, show_answers=False):
         answers = self.make_check_answers()
@@ -325,149 +294,6 @@ def store_images(solution, out_dir):
                 continue
             out_fname = pjoin(out_dir, 'chunk-{}_item-{}.png'.format(i, j))
             result['content'].save(out_fname)
-
-
-class Answer:
-
-    def __init__(self, mark, tester):
-        self.mark = mark
-        self.tester = tester
-
-    def __call__(self, ev_chunk):
-        if ev_chunk.results is None:
-            return np.nan
-        return self._grade(ev_chunk)
-
-    def _grade(self, ev_chunk):
-        return self.tester(ev_chunk)
-
-
-class AnyAnswer(Answer):
-
-    def _grade(self, ev_chunk):
-        for result in ev_chunk.results:
-            mark = self.tester(result)
-            if mark > 0:
-                return mark
-        return 0
-
-
-class TextAnswer(AnyAnswer):
-
-    def __init__(self, mark, target, strip=False):
-        self.mark = mark
-        self.target = target.strip() if strip else target
-        self.strip = strip
-
-    def _test(self, source):
-        if self.strip:
-            source = source.strip()
-        return source == self.target
-
-    def tester(self, result):
-        if result['type'] not in ('text', 'stdout'):
-            return 0
-        return self.mark if self._test(result['content']) else 0
-
-
-class StartTextAnswer(TextAnswer):
-
-    def _test(self, source):
-        return source.startswith(self.target)
-
-
-class StrippedTextAnswer(TextAnswer):
-
-    def __init__(self, mark, target):
-        self.mark = mark
-        self.lines = [L.strip() for L in target.splitlines()]
-
-    def _test(self, source):
-        source_lines = [L.strip() for L in source.splitlines()]
-        if len(source_lines) != len(self.lines):
-            return False
-        for s_line, t_line in zip(source_lines, self.lines):
-            if s_line != t_line:
-                return False
-        return True
-
-
-class RegexAnswer(TextAnswer):
-
-    def __init__(self, mark, target, flags=0):
-        self.mark = mark
-        kwargs = {'flags': flags} if flags else {}
-        self.regex = re.compile(target, **kwargs)
-
-    def _test(self, source):
-        return self.regex.search(source)
-
-
-class RawRegexAnswer(RegexAnswer):
-
-    def __init__(self, mark, target, flags=0):
-        super().__init__(mark, raw2regex(target), flags)
-
-
-class ImgAnswer(AnyAnswer):
-
-    def __init__(self, mark, expected, crop_box=None, thresh=None, bw=False):
-        self.mark = mark
-        if isinstance(expected, str):
-            expected = Image.open(expected)
-        self.expected = expected
-        self.crop_box = crop_box
-        self._cropped_expected = expected.crop(crop_box)
-        self.thresh = (self._rms(self._cropped_expected) / 100
-                       if thresh is None else thresh)
-        self.bw = bw
-
-    def _cmp_image(self, other):
-        this = self._cropped_expected
-        other = other.crop(self.crop_box)
-        if not other.size == this.size:
-            return False
-        if self.bw:
-            this = this.convert('1')
-            other = other.convert('1')
-        diff = np.array(this) - np.array(other)
-        return self._rms(diff) < self.thresh
-
-    def _rms(self, img):
-        return np.sqrt(np.mean(np.asarray(img) ** 2))
-
-    def tester(self, result):
-        if result['type'] != 'image':
-            return 0
-        return self.mark if self._cmp_image(result['content']) else 0
-
-
-class BestOf(Answer):
-
-    def __init__(self, answers):
-        self.answers = answers
-
-    def _grade(self, ev_chunk):
-        return max([answer._grade(ev_chunk) for answer in self.answers])
-
-
-def make_bestof_texts(mark, texts, strip=False):
-    return BestOf(
-        [TextAnswer(mark, text, strip) for text in texts])
-
-
-def make_bestof_images(mark, images, box):
-    return BestOf([ImgAnswer(mark, img, box) for img in images])
-
-
-def apply_box(in_fname, out_fname, box):
-    """ Write image filename `in_fname` with cropping in `box`
-
-    A helper function.
-    """
-    in_img = Image.open(in_fname)
-    out_img = in_img.crop(box)
-    out_img.save(out_fname)
 
 
 def duplicates(filenames):

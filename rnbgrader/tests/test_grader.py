@@ -9,8 +9,8 @@ from glob import glob
 
 from rnbgrader import JupyterKernel
 from rnbgrader.grader import (OPTIONAL_PROMPT, NBRunner, report, duplicates,
-                              CanvasGrader, RegexAnswer, ImgAnswer, raw2regex,
-                              RawRegexAnswer, NotebookError)
+                              CanvasGrader, NotebookError)
+from rnbgrader.answers import RegexAnswer, ImgAnswer, raw2regex, RawRegexAnswer
 
 import pytest
 
@@ -137,16 +137,8 @@ class CarsGrader(CanvasGrader):
 
         self._chk_img_answer(10, 7)
 
-        return self._answers
-
 
 CARS_GRADER = CarsGrader()
-
-
-def test_raw2regex():
-    raw = r""" Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
-        4.00   23.00   40.00   41.73   48.00  190.00     960 """
-    assert re.search(raw2regex(raw), raw)
 
 
 def test_solution():

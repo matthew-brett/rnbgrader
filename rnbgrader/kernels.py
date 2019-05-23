@@ -18,7 +18,7 @@ from queue import Empty
 from PIL import Image
 from jupyter_client.manager import start_new_kernel
 
-DEFAULT_TIMEOUT = 15
+DEFAULT_TIMEOUT = 30
 
 
 class JupyterKernel(object):
