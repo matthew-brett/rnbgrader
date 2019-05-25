@@ -9,6 +9,7 @@ from glob import glob
 from collections import defaultdict
 from hashlib import sha1
 from tempfile import TemporaryDirectory
+import re
 
 import pandas as pd
 
@@ -18,6 +19,8 @@ from rnbgrader.answers import ImgAnswer
 
 
 OPTIONAL_PROMPT = r'^\s*(?:\[\d+\] )?'
+
+MARK_MARKUP_RE = re.compile(r'\s*#\s*M\s*:\s*([-+]?[.0-9]+)\s*$', re.M)
 
 
 class NotebookError(Exception):
@@ -211,17 +214,19 @@ class Grader:
                             help="Show scores for individual answers")
         return parser
 
-    def grade_notebook(self, fname, answers=None):
+    def grade_notebook(self, fileish, answers=None):
         answers = self.make_check_answers() if answers is None else answers
         with JupyterKernel('ir') as rk:
-            ev_chunks = self.runner.run(fname, rk)
+            ev_chunks = self.runner.run(fileish, rk)
             result = rk.run_code(self.subtract_var_name)
             # Stuff put in by me with patching
             extra = float(result[0]['content'].split()[1])
+        # Get adjustments from markup
+        markups = sum(self.mark_markups(fileish))
         grid = full_grid(answers, ev_chunks)
         names = [a.name if a.name else 'unnamed' for a in answers]
-        names.append('adjustments')
-        return pd.Series(list(max_multi(grid)) + [extra], names)
+        names += ['adjustments', 'markups']
+        return pd.Series(list(max_multi(grid)) + [extra, markups], names)
 
     def grade_all_notebooks(self, submission_dir, show_answers=False):
         answers = self.make_check_answers()
@@ -247,10 +252,31 @@ class Grader:
             self.print_solution(i)
             print('\n')
 
+    def mark_markups(self, fileish):
+        """ Return marks from mark markup lines
+        """
+        nb = nb_load(fileish)
+        markups = []
+        for chunk in nb.chunks:
+            markups += MARK_MARKUP_RE.findall(chunk.code)
+        return tuple(float(m) for m in markups)
+
+    def raise_for_markup(self, submissions):
+        """ Check submissions for markup
+
+        There should be no markup when first submitted.
+        """
+        for submission in submissions:
+            if self.mark_markups(submission) != ():
+                raise NotebookError(f'{submission} contains markup')
+
     def check_submissions(self, submissions):
+        """ Inherit and override to add checking for valid filenames etc
+        """
         return
 
     def get_submissions(self, submission_dir):
+        """ Return filenames of submissions """
         submissions = []
         for submission in sorted(glob(pjoin(submission_dir, '*'))):
             if not splitext(submission)[1].lower().startswith('.rmd'):

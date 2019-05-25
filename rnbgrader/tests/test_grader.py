@@ -8,8 +8,9 @@ from hashlib import sha1
 from glob import glob
 
 from rnbgrader import JupyterKernel
-from rnbgrader.grader import (OPTIONAL_PROMPT, NBRunner, report, duplicates,
-                              CanvasGrader, NotebookError)
+from rnbgrader.grader import (OPTIONAL_PROMPT, MARK_MARKUP_RE, NBRunner,
+                              report, duplicates, Grader, CanvasGrader,
+                              NotebookError)
 from rnbgrader.answers import RegexAnswer, ImgAnswer, raw2regex, RawRegexAnswer
 
 import pytest
@@ -188,3 +189,82 @@ b
     with pytest.raises(NotebookError):
         with JupyterKernel('ir') as rk:
             runner.run(nb, rk)
+
+
+def test_mark_markup():
+    assert MARK_MARKUP_RE.match('#M: -2.5').groups() == ('-2.5',)
+    assert MARK_MARKUP_RE.match('#M:-2.5').groups() == ('-2.5',)
+    assert MARK_MARKUP_RE.match('# M : -2.5').groups() == ('-2.5',)
+    assert MARK_MARKUP_RE.match('foo\n# M : -2.5  \nbar').groups() == ('-2.5',)
+    assert MARK_MARKUP_RE.match('#M : -2.5  ').groups() == ('-2.5',)
+    assert MARK_MARKUP_RE.match('#M : +2.5  ').groups() == ('+2.5',)
+    assert MARK_MARKUP_RE.match('#M : +22. ').groups() == ('+22.',)
+    assert MARK_MARKUP_RE.match('#M : 11.999 ').groups() == ('11.999',)
+    assert MARK_MARKUP_RE.match('\t#M : -2.5  ').groups() == ('-2.5',)
+    assert MARK_MARKUP_RE.match('#M: --2.5') is None
+    assert MARK_MARKUP_RE.match('#M: +-2.5') is None
+    assert MARK_MARKUP_RE.match('#M: ++2.5') is None
+    assert MARK_MARKUP_RE.match('#M: 2.5 ish') is None
+
+
+def test_markup_in_nb():
+    bare_nb = io.StringIO("""
+
+Some text.
+
+```{r}
+a <- 1
+a
+```
+
+More text.
+
+#M: 10
+
+```{r}
+b <- 2
+```
+""")
+    assert CARS_GRADER.mark_markups(bare_nb) == ()
+
+    annotated_nb = io.StringIO("""
+
+Some text.
+
+```{r}
+a <- 1
+a
+# M: 2.0
+```
+
+More text.
+
+#M: 10
+
+```{r}
+#M : -2.5
+b <- 2
+```
+""")
+
+    assert CARS_GRADER.mark_markups(annotated_nb) == (2., -2.5)
+
+
+def test_raise_for_markup():
+    g = Grader()
+    for sdir in ('test_submissions', 'test_submissions2'):
+        pth = pjoin(DATA, sdir)
+        g.raise_for_markup(g.get_submissions(pth))
+
+
+def test_markup_used():
+    g = CARS_GRADER
+    pth = pjoin(DATA, 'test_submissions_markup')
+    mb = pjoin(pth, 'brettmatthew_139741_6519327_some_name.Rmd')
+    assert g.mark_markups(mb) == (-2, 42)
+    vr2 = pjoin(pth, 'rodriguezvalia_140801_6518299_notebook.rmd')
+    assert g.mark_markups(vr2) == ()
+    mb_marks = g.grade_notebook(mb)
+    assert list(mb_marks.index) == ['unnamed'] * 7 + ['adjustments', 'markups']
+    assert sum(mb_marks) == 80
+    assert sum(g.grade_notebook(vr2)) == 40
