@@ -20,7 +20,7 @@ from rnbgrader.answers import ImgAnswer
 
 OPTIONAL_PROMPT = r'^\s*(?:\[\d+\] )?'
 
-MARK_MARKUP_RE = re.compile(r'\s*#\s*M\s*:\s*([-+]?[.0-9]+)\s*$', re.M)
+MARK_MARKUP_RE = re.compile(r'^\s*#\s*M\s*:\s*([-+]?[.0-9]+)\s*$', re.M)
 
 
 class NotebookError(Exception):

@@ -195,7 +195,8 @@ def test_mark_markup():
     assert MARK_MARKUP_RE.match('#M: -2.5').groups() == ('-2.5',)
     assert MARK_MARKUP_RE.match('#M:-2.5').groups() == ('-2.5',)
     assert MARK_MARKUP_RE.match('# M : -2.5').groups() == ('-2.5',)
-    assert MARK_MARKUP_RE.match('foo\n# M : -2.5  \nbar').groups() == ('-2.5',)
+    assert MARK_MARKUP_RE.search('foo\n# M : -2.5  \nbar').groups() == ('-2.5',)
+    assert MARK_MARKUP_RE.search('foo  # M : -2.5  \nbar') is None
     assert MARK_MARKUP_RE.match('#M : -2.5  ').groups() == ('-2.5',)
     assert MARK_MARKUP_RE.match('#M : +2.5  ').groups() == ('+2.5',)
     assert MARK_MARKUP_RE.match('#M : +22. ').groups() == ('+22.',)
