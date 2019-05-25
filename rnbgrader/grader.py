@@ -42,12 +42,12 @@ class NBRunner:
         """
         return chunks
 
-    def get_chunks(self, fname):
-        nb = nb_load(fname)
+    def get_chunks(self, fileish):
+        nb = nb_load(fileish)
         return self.process_chunks(nb.chunks)
 
-    def run(self, fname, rk):
-        chunks = self.get_chunks(fname)
+    def run(self, fileish, rk):
+        chunks = self.get_chunks(fileish)
         # Clear all variables from kernel workspace
         rk.clear()
         rk.run_code(self.subtract_var_name + ' <- 0')
@@ -57,8 +57,16 @@ class NBRunner:
         results = runner.results
         if runner.outcome != 'ok':
             raise NotebookError(
-                f'Error running {fname}:\n{report(results)}')
+                f'Error running {get_fname(fileish)}:\n{report(results)}')
         return results
+
+
+def get_fname(fileish):
+    """ Return filename from `fileish`
+    """
+    if isinstance(fileish, str):
+        return fileish
+    return getattr(fileish, 'name', "<file object>")
 
 
 def report(results):
