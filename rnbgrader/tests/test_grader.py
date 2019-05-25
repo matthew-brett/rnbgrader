@@ -208,6 +208,15 @@ def test_mark_markup():
     assert MARK_MARKUP_RE.match('#M: 2.5 ish') is None
 
 
+def test_initial_check():
+    g = CanvasGrader()
+    with pytest.raises(CanvasError):
+        g.initial_check(pjoin(DATA, 'test_submissions'))
+    with pytest.raises(NotebookError):
+        g.initial_check(pjoin(DATA, 'test_submissions_markup'))
+    g.initial_check(pjoin(DATA, 'test_submissions2'))
+
+
 def test_markup_in_nb():
     bare_nb = io.StringIO("""
 
