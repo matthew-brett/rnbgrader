@@ -355,7 +355,15 @@ def assert_answers_only(answer, chunk_no, solution):
     """ Check that answer `answer` only corresponds to ``solution[chunk_no]``
     """
     for i, ev_chunk in enumerate(solution):
+        code = ev_chunk.chunk.code
+        a_name = '"unnamed"' if answer.name is None else answer.name
         if i == chunk_no:
-            assert answer(ev_chunk) > 0
-        else:
-            assert answer(ev_chunk) == 0
+            if answer(ev_chunk) == 0:
+                raise NotebookError(
+                    f'{i}: {code} does not give marks for {a_name}')
+            continue
+        if answer(ev_chunk) != 0:
+            raise NotebookError(
+                f'{i}: {code} gives marks for {a_name}, '
+                f'but this should only be true for chunk {chunk_no}')
+
