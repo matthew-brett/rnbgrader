@@ -1,7 +1,9 @@
 # Minimum requirements
 #
 numpy>=1.12.0
+pandas>=0.22
 Pillow
 pypandoc
 jupyter_client>=5.0.0
 tornado
+gradools
