@@ -1,0 +1,93 @@
+---
+jupyter:
+  jupytext:
+    notebook_metadata_filter: all,-language_info
+    split_at_heading: true
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.1'
+      jupytext_version: 1.2.4
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook, in Python.
+
+```{python}
+import pandas as pd
+# %matplotlib inline
+
+# Load the cars data frame
+cars = pd.read_csv('cars.csv')
+```
+
+Show the names of the columns in the `cars` data frame:
+
+```{python}
+list(cars)
+```
+
+Show the number of rows and columns:
+
+```{python}
+#- Show the number of rows and columns of the "cars"
+#- data frame.
+#- 5 marks / 50 (total 5 so far).
+cars.shape
+```
+
+Show the structure of the `cars` data frame:
+
+```{python}
+#- Show the structure of the cars data frame
+#- 5 marks / 50 (total 10 so far).
+cars.info()
+```
+
+Show the first 6 cars (rows) in the data frame using the `head` method:
+
+```{python}
+#- Show the first 5 cars with the "head" method.
+#- 5 marks / 50 (total 15 so far).
+cars.head()
+```
+
+Show a histogram of the `speed` column of the `cars` data frame:
+
+```{python}
+#- Do a histogram of the speeks
+#- 10 marks / 50 (total 25 so far).
+cars['speed'].hist()
+```
+
+Use the `value_counts` method to show the counts of the various speeds.
+
+```{python}
+#- Use "value_counts" to show the counts of cars with each speed value.
+#- 5 marks / 50 (total 30 so far).
+cars['speed'].value_counts()
+```
+
+Make a new data frame containing the rows with speeds less than 15:
+
+```{python}
+#- Make a new data frame called "fast" containing only the cars
+#- with speeds greater than 15.  Use the subset command.
+#- Then, use "head" to check that you have cars faster than 15.
+#- 10 marks / 50 (total 40 so far).
+fast = cars[cars['speed'] > 15]
+fast.head()
+```
+
+Finally, do a histogram of the `dist` column of the `fast` data frame:
+
+```{python}
+#- Do a histogram of the dist column.
+#- 10 marks / 50 (total 50 so far).
+fast['dist'].hist()
+```
+
+That's it.
