@@ -28,12 +28,9 @@ class NotebookError(Exception):
     """ Error running notebook """
 
 
-class NBRunner:
+class NBRunBase:
 
     chunk_cls = ChunkRunner
-
-    def __init__(self, subtract_var_name):
-        self.subtract_var_name = subtract_var_name
 
     def process_chunks(self, chunks):
         """ Process chunks
@@ -50,19 +47,42 @@ class NBRunner:
         nb = nb_load(fileish)
         return self.process_chunks(nb.chunks)
 
+    def pre_run(self, rk):
+        """ Run pre-loading etc code.
+
+        Notes
+        -----
+        You can use this function to run code to initialize the notebook.
+        Examples might be setting variables used in marking, or redefining
+        functions to restrict complexity or disable them.
+        """
+        pass
+
     def run(self, fileish, rk):
         chunks = self.get_chunks(fileish)
-        # Clear all variables from kernel workspace
-        rk.run_code('rm(list = ls())')
-        rk.run_code(self.subtract_var_name + ' <- 0')
-        # Unset troubling View function
-        rk.run_code('View <- function(df) {}')
+        self.pre_run(rk)
         runner = self.chunk_cls(chunks, rk)
         results = runner.results
         if runner.outcome != 'ok':
             raise NotebookError(
                 f'Error running {get_fname(fileish)}:\n{report(results)}')
         return results
+
+
+class NBRunner(NBRunBase):
+    """ Class for running some R notebooks """
+
+    def __init__(self, subtract_var_name):
+        self.subtract_var_name = subtract_var_name
+
+    def pre_run(self, rk):
+        """ Run pre-loading etc code.
+        """
+        # Clear all variables from kernel workspace
+        rk.run_code('rm(list = ls())')
+        rk.run_code(self.subtract_var_name + ' <- 0')
+        # Unset troubling View function
+        rk.run_code('View <- function(df) {}')
 
 
 def get_fname(fileish):
