@@ -21,7 +21,7 @@ from jupyter_client.manager import start_new_kernel
 DEFAULT_TIMEOUT = 30
 
 
-class JupyterKernel(object):
+class JupyterKernel:
     r""" Helper class to instantiate and use a Jupyter kernel
 
     Examples
@@ -131,7 +131,8 @@ class JupyterKernel(object):
             return dict(type=content['name'],
                         message=msg,
                         content=content['text'])
-        if msg['msg_type'] != 'display_data':
+        if msg['msg_type'] not in  ('display_data',
+                                    'execute_result'):
             raise RuntimeError("Don't recognize message type " +
                                msg['msg_type'])
         data = msg['content']['data']

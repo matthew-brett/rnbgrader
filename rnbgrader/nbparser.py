@@ -1,6 +1,6 @@
-""" R Notebook parser
+""" R Markdown notebook parser
 
-Parse R notebook in R Markdown.
+Parse notebook in R Markdown.
 
 Extract code chunks from notebook.
 """
