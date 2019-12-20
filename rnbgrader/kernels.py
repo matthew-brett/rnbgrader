@@ -45,23 +45,23 @@ class JupyterKernel:
         timeout : float, optional
             Default timeout in seconds.
         """
-        self._km, self._kc = start_new_kernel(kernel_name=kernel_name)
+        self.manager, self.client = start_new_kernel(kernel_name=kernel_name)
         self.timeout = timeout
 
     def shutdown(self):
         """ Shutdown the kernel """
-        # Object may have broken during initialization, no _km, _kc
-        if not hasattr(self, '_kc'):
+        # Object may have broken during initialization, no manager, client
+        if not hasattr(self, 'client'):
             return
-        self._kc.stop_channels()
-        self._km.shutdown_kernel()
+        self.client.stop_channels()
+        self.manager.shutdown_kernel()
 
     def __del__(self):
         self.shutdown()
 
     def flush_channels(self):
         """ Flush all kernel channels """
-        for channel in (self._kc.shell_channel, self._kc.iopub_channel):
+        for channel in (self.client.shell_channel, self.client.iopub_channel):
             while True:
                 try:
                     channel.get_msg(block=True, timeout=0.1)
@@ -97,7 +97,7 @@ class JupyterKernel:
         """
         timeout = self.timeout if timeout is None else timeout
 
-        kc = self._kc
+        kc = self.client
 
         msg_id = kc.execute(code=code, silent=silent,
                             store_history=store_history,
