@@ -34,7 +34,7 @@ class JupyterKernel:
     '[1] 1'
     """
 
-    def __init__(self, kernel_name, timeout=DEFAULT_TIMEOUT):
+    def __init__(self, kernel_name, timeout=DEFAULT_TIMEOUT, **kwargs):
         """ Initialize Jupyter kernel object
 
         Parameters
@@ -44,8 +44,12 @@ class JupyterKernel:
             https://irkernel.github.io/docs/IRkernel).
         timeout : float, optional
             Default timeout in seconds.
+        \*\*kwargs : dict
+            Arguments to pass to `start_kernel`. `cwd='some/path'` is one
+            example.
         """
-        self.manager, self.client = start_new_kernel(kernel_name=kernel_name)
+        self.manager, self.client = start_new_kernel(kernel_name=kernel_name,
+                                                     **kwargs)
         self.timeout = timeout
 
     def shutdown(self):

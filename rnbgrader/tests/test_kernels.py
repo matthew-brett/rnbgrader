@@ -1,12 +1,19 @@
 """ Test kernels module
 """
-from functools import wraps
+
+import os
+import os.path as op
+import re
 
 import PIL
 
 from rnbgrader import JupyterKernel
 
 import pytest
+
+
+PROMPT_STR_RE = re.compile(r'^\s*(?:\[\d+\] )"(.*)"')
+
 
 @pytest.fixture
 def rkernel():
@@ -73,3 +80,16 @@ def test_context_manager():
     with JupyterKernel('ir') as rk:
         output, = rk.run_code('a = 1\na')
         assert _stripped(output) == dict(type='text', content='[1] 1')
+
+
+def test_kwargs():
+    # Test can run in given directory.
+    with JupyterKernel('ir') as rk:
+        output = _stripped(rk.run_code('getwd()')[0])
+        pth = PROMPT_STR_RE.search(output['content']).groups()[0]
+        assert op.realpath(pth) == op.realpath(os.getcwd())
+    data_path = op.join(op.dirname(__file__), 'data')
+    with JupyterKernel('ir', cwd=data_path) as rk:
+        output = _stripped(rk.run_code('getwd()')[0])
+        pth = PROMPT_STR_RE.search(output['content']).groups()[0]
+        assert op.realpath(pth) == op.realpath(data_path)
