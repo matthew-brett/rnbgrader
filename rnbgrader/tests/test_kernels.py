@@ -45,13 +45,13 @@ def _stripped(output):
     return output
 
 
-def test_clear(rkernel):
+def test_clear_ns(rkernel):
     outputs = rkernel.run_code('a = 1')
     assert len(outputs) == 0
     outputs = rkernel.run_code('a')
     assert len(outputs) == 1
     assert _stripped(outputs[0]) == dict(type='text', content='[1] 1')
-    rkernel.clear()
+    rkernel.run_code('rm(list = ls())')
     outputs = rkernel.run_code('a')
     assert len(outputs) == 1
     assert outputs[0]['type'] == 'error'

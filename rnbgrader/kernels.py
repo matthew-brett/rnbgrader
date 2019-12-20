@@ -179,9 +179,6 @@ class JupyterKernel:
         assert reply['header']['msg_type'] == 'execute_reply'
         return [self._process_output(msg) for msg in output_msgs]
 
-    def clear(self):
-        self.run_code('rm(list = ls())')
-
     def __enter__(self):
         return self
 

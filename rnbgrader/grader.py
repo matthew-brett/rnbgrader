@@ -53,7 +53,7 @@ class NBRunner:
     def run(self, fileish, rk):
         chunks = self.get_chunks(fileish)
         # Clear all variables from kernel workspace
-        rk.clear()
+        rk.run_code('rm(list = ls())')
         rk.run_code(self.subtract_var_name + ' <- 0')
         # Unset troubling View function
         rk.run_code('View <- function(df) {}')
