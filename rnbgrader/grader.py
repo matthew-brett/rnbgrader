@@ -28,7 +28,7 @@ class NotebookError(Exception):
     """ Error running notebook """
 
 
-class NBRunBase:
+class NBRunner:
 
     chunk_cls = ChunkRunner
 
@@ -58,6 +58,16 @@ class NBRunBase:
         """
         pass
 
+    def post_run(self, rk):
+        """ Run code at end of notebook.
+
+        Notes
+        -----
+        You can use this function to run code at the end of the notebook.
+        An example might be deleting temporary files.
+        """
+        pass
+
     def run(self, fileish, rk):
         chunks = self.get_chunks(fileish)
         self.pre_run(rk)
@@ -66,23 +76,8 @@ class NBRunBase:
         if runner.outcome != 'ok':
             raise NotebookError(
                 f'Error running {get_fname(fileish)}:\n{report(results)}')
+        self.post_run(rk)
         return results
-
-
-class NBRunner(NBRunBase):
-    """ Class for running some R notebooks """
-
-    def __init__(self, subtract_var_name):
-        self.subtract_var_name = subtract_var_name
-
-    def pre_run(self, rk):
-        """ Run pre-loading etc code.
-        """
-        # Clear all variables from kernel workspace
-        rk.run_code('rm(list = ls())')
-        rk.run_code(self.subtract_var_name + ' <- 0')
-        # Unset troubling View function
-        rk.run_code('View <- function(df) {}')
 
 
 def get_fname(fileish):
@@ -157,12 +152,11 @@ class Grader:
     solution_rmds = ()
     standard_box = (44, 81, 800, 770)
     cacher = CachedBuiltNotebook
-    run_cls = NBRunner
-    subtract_var_name = 'mkt__'
+    run_maker = NBRunner
     total = 100
 
     def __init__(self):
-        self.runner = self.run_cls(self.subtract_var_name)
+        self.runner = self.run_maker()
         self._solution_nbs = tuple(
             self.cacher(nb, self.runner) for nb in self.solution_rmds)
         self.rebuild()
@@ -235,19 +229,22 @@ class Grader:
                             help="Show scores for individual answers")
         return parser
 
+    def calc_adjustments(self, rk):
+        """ Calculate adjustments at end of notebook, using kernel.
+        """
+        return 0
+
     def grade_notebook(self, fileish, answers=None):
         answers = self.make_check_answers() if answers is None else answers
         with JupyterKernel('ir') as rk:
             ev_chunks = self.runner.run(fileish, rk)
-            result = rk.run_code(self.subtract_var_name)
-            # Stuff put in by me with patching
-            extra = float(result[0]['content'].split()[1])
+            adjustments = self.calc_adjustments(rk)
         # Get adjustments from markup
         markups = sum(self.mark_markups(fileish))
         grid = full_grid(answers, ev_chunks)
         names = [a.name if a.name else 'unnamed' for a in answers]
         names += ['adjustments', 'markups']
-        return pd.Series(list(max_multi(grid)) + [extra, markups], names)
+        return pd.Series(list(max_multi(grid)) + [adjustments, markups], names)
 
     def grade_all_notebooks(self, submission_dir, show_answers=False):
         answers = self.make_check_answers()

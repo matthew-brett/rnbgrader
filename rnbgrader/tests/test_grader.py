@@ -29,7 +29,7 @@ def test_optional_prompt():
 
 
 def test_report():
-    runner = NBRunner('some_var')
+    runner = NBRunner()
     nb_fileobj0 = io.StringIO("""
 Text
 
@@ -185,7 +185,7 @@ More text.
 b
 ```
 """)
-    runner = NBRunner('some_var')
+    runner = NBRunner()
     with pytest.raises(NotebookError):
         with JupyterKernel('ir') as rk:
             runner.run(nb, rk)
