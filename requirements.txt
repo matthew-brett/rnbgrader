@@ -7,3 +7,4 @@ pypandoc
 jupyter_client>=5.0.0
 tornado
 gradools
+ipykernel
