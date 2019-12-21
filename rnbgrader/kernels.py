@@ -35,7 +35,7 @@ class JupyterKernel:
     """
 
     def __init__(self, kernel_name, timeout=DEFAULT_TIMEOUT, **kwargs):
-        """ Initialize Jupyter kernel object
+        r""" Initialize Jupyter kernel object
 
         Parameters
         ----------
