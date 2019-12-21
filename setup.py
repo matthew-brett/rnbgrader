@@ -45,9 +45,9 @@ setup(name='rnbgrader',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: BSD License',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.4',
-          'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
           'Topic :: Scientific/Engineering',
           'Operating System :: Microsoft :: Windows',
           'Operating System :: POSIX',
@@ -58,5 +58,10 @@ setup(name='rnbgrader',
       install_requires = install_requires,
       extras_require = {'test': test_requires},
       # For pip versions >= 9
-      python_requires = '>=3.4'
+      python_requires = '>=3.6',
+      entry_points={
+          'console_scripts': [
+              'rnbgrader-exe-check = rnbgrader.execheck:main',
+          ],
+      },
       )
