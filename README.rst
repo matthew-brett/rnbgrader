@@ -1,8 +1,16 @@
-########################################################
-RNBGrader - utilities for grading R Notebook assignments
-########################################################
+######################################################
+RNBGrader - utilities for grading R Markdown notebooks
+######################################################
 
 .. shared-text-body
+
+Utilities for grading notebooks in `R Markdown
+<https://rmarkdown.rstudio.com>`_
+
+Notebooks can be `R notebooks
+<https://bookdown.org/yihui/rmarkdown/notebook.html>`_ or `Jupyter notebooks
+<https://jupyter-notebook-beginner-guide.readthedocs.io/en/latest/what_is_jupyter.html>`_
+converted to R Markdown with `Jupytext <https://github.com/mwouts/jupytext>`_
 
 **********
 Quickstart
@@ -28,7 +36,7 @@ Released under the BSD two-clause license - see the file ``LICENSE`` in the
 source distribution.
 
 `travis-ci <https://travis-ci.org/matthew-brett/rnbgrader>`_ kindly tests the
-code automatically under Python versions 3.4 through 3.6.
+code automatically under Python versions 3.6 through 3.8.
 
 The latest released version is at https://pypi.python.org/pypi/rnbgrader
 
@@ -37,13 +45,13 @@ Tests
 *****
 
 * Install ``rnbgrader``;
-* Install the pytest_ testing framework::
+* Install the test requirements::
 
-    pip install pytest
+    pip install -r test-requirements
 
 * Run the tests with::
 
-    py.test rnbgrader
+    pytest rnbgrader
 
 *******
 Support

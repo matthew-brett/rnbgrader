@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ''' Installation script for rnbgrader package '''
-import os
-from os.path import join as pjoin, split as psplit, splitext
 import re
 
 import setuptools
@@ -28,7 +26,7 @@ cmdclass = versioneer.get_cmdclass()
 setup(name='rnbgrader',
       version=versioneer.get_version(),
       cmdclass=cmdclass,
-      description='Utilities for grading R Notebook assignments',
+      description='Utilities for grading R Markdown notebook assignments',
       author='Matthew Brett',
       author_email='matthew.brett@gmail.com',
       maintainer='Matthew Brett',
