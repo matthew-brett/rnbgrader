@@ -10,7 +10,6 @@ from collections import defaultdict
 from hashlib import sha1
 from tempfile import TemporaryDirectory
 import re
-from pprint import pprint
 
 import pandas as pd
 
@@ -293,10 +292,7 @@ class Grader:
         """
         submissions = self.get_submissions(submission_dir)
         self.raise_for_markup(submissions)
-        dups = duplicates(submissions)
-        if len(dups):
-            print('Found duplicates:\n')
-            pprint(dups)
+        return duplicates(submissions)
 
     def check_submissions(self, submissions):
         """ Inherit and override to add checking for valid filenames etc

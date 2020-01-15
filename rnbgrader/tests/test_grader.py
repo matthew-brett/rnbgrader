@@ -18,6 +18,8 @@ import pytest
 from gradools.canvastools import CanvasError
 
 DATA = pjoin(dirname(__file__), 'data')
+MB_NB_FN = 'brettmatthew_139741_6519327_some_name.Rmd'
+VR2_NB_FN = 'rodriguezvalia_140801_6518299_notebook.rmd'
 
 
 def test_optional_prompt():
@@ -214,7 +216,12 @@ def test_initial_check():
         g.initial_check(pjoin(DATA, 'test_submissions'))
     with pytest.raises(NotebookError):
         g.initial_check(pjoin(DATA, 'test_submissions_markup'))
-    g.initial_check(pjoin(DATA, 'test_submissions2'))
+    pth = pjoin(DATA, 'test_submissions2')
+    res = g.initial_check(pth)
+    mb = pjoin(pth, MB_NB_FN)
+    with open(mb, 'rb') as fobj:
+        mb_sha = sha1(fobj.read()).hexdigest()
+    assert res == {mb_sha: [mb, pjoin(pth, VR2_NB_FN)]}
 
 
 def test_markup_in_nb():
@@ -270,9 +277,9 @@ def test_raise_for_markup():
 def test_markup_used():
     g = CARS_GRADER
     pth = pjoin(DATA, 'test_submissions_markup')
-    mb = pjoin(pth, 'brettmatthew_139741_6519327_some_name.Rmd')
+    mb = pjoin(pth, MB_NB_FN)
+    vr2 = pjoin(pth, VR2_NB_FN)
     assert g.mark_markups(mb) == (-2, 42)
-    vr2 = pjoin(pth, 'rodriguezvalia_140801_6518299_notebook.rmd')
     assert g.mark_markups(vr2) == ()
     mb_marks = g.grade_notebook(mb)
     assert list(mb_marks.index) == ['unnamed'] * 7 + ['adjustments', 'markups']
