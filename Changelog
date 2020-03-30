@@ -13,6 +13,16 @@ rnbgrader change log
 Releases
 ********
 
+* 0.2 (Monday March 30 2020)
+
+  * Generalize to Python notebooks in RMarkdown format (courtesy of Jupytext).
+  * Require Python >= 3.6
+  * Remove 'clear' method from notebook kernel wrapper (doesn't easily apply
+    to Python).
+  * Add pre_run, post_run methods to NBRunner.
+  * Add rnbgrader-exe-check script.
+  * Add grader module.
+
 * 0.1.1 (Wednesday November 14 2018)
 
   Add pip requirements.
