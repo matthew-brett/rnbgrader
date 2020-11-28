@@ -58,7 +58,8 @@ class JupyterKernel:
         if not hasattr(self, 'client'):
             return
         self.client.stop_channels()
-        self.manager.shutdown_kernel()
+        if self.manager.has_kernel:
+            self.manager.shutdown_kernel()
 
     def __del__(self):
         self.shutdown()
