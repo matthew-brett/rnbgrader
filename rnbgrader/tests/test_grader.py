@@ -323,3 +323,67 @@ first_var
     solns = g.solutions
     assert len(solns) == 1
     assert len(solns[0]) == 3
+
+
+def assert_seq_equal(s1, s2):
+    assert tuple(s1) == tuple(s2)
+
+
+def test_chunk_is_answer():
+    runner = NBRunner()
+    nb_text = """
+Text
+
+```{r}
+#- A question
+first_var <- 99
+```
+
+More text
+
+```{r}
+first_var
+```
+
+```{r}
+#- Actual answer
+first_var
+```
+"""
+    with JupyterKernel('ir') as rk:
+        chunks = runner.run(StringIO(nb_text), rk)
+    g = Grader()
+    assert_seq_equal(chunks, g.remove_not_answers(chunks))
+    # First check case where not-answer present raises error
+
+    class MyG(Grader):
+
+        solution_rmds = (StringIO(nb_text),)
+        total = 5
+
+        def make_answers(self):
+            self._chk_answer(RegexAnswer(
+                5,
+                OPTIONAL_PROMPT + r'99'),
+                1)
+
+    g = MyG()
+    # Doesn't remove any chunks.
+    assert_seq_equal(chunks, g.remove_not_answers(chunks))
+    with pytest.raises(NotebookError):
+        g.grade_notebook(StringIO(nb_text))
+
+    # Check case with answer removed.
+    class MyG2(MyG):
+
+        solution_rmds = (StringIO(nb_text),)
+
+        def chunk_is_answer(self, chunk):
+            return chunk.chunk.code != 'first_var\n'
+
+    g2 = MyG2()
+    # Removes chunks.
+    assert_seq_equal([chunks[0], chunks[2]], g2.remove_not_answers(chunks))
+    # Answers now not duplicated.
+    assert np.all(np.array(g2.grade_notebook(StringIO(nb_text))) ==
+                  [5, 0, 0])

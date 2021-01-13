@@ -216,7 +216,10 @@ class Grader:
 
     @property
     def solutions(self):
-        return [snb.solution for snb in self._solution_nbs]
+        solutions = []
+        for snb in self._solution_nbs:
+            solutions.append(self.remove_not_answers(snb.solution))
+        return solutions
 
     @property
     def solution_dirs(self):
@@ -249,6 +252,13 @@ class Grader:
                             help="Show scores for individual answers")
         return parser
 
+    def chunk_is_answer(self, chunk):
+        # Override to remove chunks that should not be taken as answers.
+        return True
+
+    def remove_not_answers(self, ev_chunks):
+        return tuple(c for c in ev_chunks if self.chunk_is_answer(c))
+
     def calc_adjustments(self, rk):
         """ Calculate adjustments at end of notebook, using kernel.
         """
@@ -259,6 +269,8 @@ class Grader:
         with JupyterKernel('ir') as rk:
             ev_chunks = self.runner.run(fileish, rk)
             adjustments = self.calc_adjustments(rk)
+        # Remove any not-answer chunks
+        ev_chunks = self.remove_not_answers(ev_chunks)
         # Get adjustments from markup
         markups = sum(self.mark_markups(fileish))
         grid = full_grid(answers, ev_chunks)
