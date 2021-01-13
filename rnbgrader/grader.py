@@ -3,6 +3,7 @@
 
 from os import makedirs
 from os.path import (exists, join as pjoin, splitext, abspath, isdir, basename)
+from io import StringIO
 import pickle
 from argparse import ArgumentParser
 from glob import glob
@@ -100,15 +101,35 @@ def report(results):
 
 class CachedBuiltNotebook:
 
-    def __init__(self, notebook_fname, runner, cache_dir=None,
+    def __init__(self, notebook_fileish, runner, cache_dir=None,
                  timeout=30):
-        self.notebook_fname = abspath(notebook_fname)
+        """ Initialize cached, built notebook object
+
+        Parameters
+        ----------
+        notebook_fileish : file-like
+            Filename or file-like object implementing ``read``.
+        runner : :class:`NBRunner` instance
+            Implements `run` method.
+        cache_dir : {None, str}, optional
+            Path to store cached results.  None results in a temporary
+            directory.
+        timeout : int, optional
+            Timeout for running individual cells.
+        """
+        if hasattr(notebook_fileish, 'read'):  # file object.
+            self.notebook_text = notebook_fileish.read()
+            self._nb_froot = sha1(
+                self.notebook_text.encode('latin1')).hexdigest()
+        else:  # Filename.
+            with open(notebook_fileish, 'rt') as fobj:
+                self.notebook_text = fobj.read()
+            self._nb_froot = basename(notebook_fileish)
         self.runner = runner
         if cache_dir is None:
             self._tmp = TemporaryDirectory()
             cache_dir = self._tmp.name
-        self.out_dir = pjoin(abspath(cache_dir),
-                             basename(self.notebook_fname) + '.built')
+        self.out_dir = pjoin(abspath(cache_dir), self._nb_froot + '.built')
         self.timeout = timeout
         self.pkl_fname = pjoin(self.out_dir, 'solution.pkl')
         self._solution = None
@@ -130,7 +151,7 @@ class CachedBuiltNotebook:
         if not isdir(self.out_dir):
             makedirs(self.out_dir)
         with JupyterKernel('ir', timeout=self.timeout) as rk:
-            solution = self.runner.run(self.notebook_fname, rk)
+            solution = self.runner.run(StringIO(self.notebook_text), rk)
         self._store_solution(solution)
         return solution
 

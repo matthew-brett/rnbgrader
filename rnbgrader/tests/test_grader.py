@@ -2,15 +2,17 @@
 """
 
 from os.path import join as pjoin, dirname
-import io
+from io import StringIO
 import re
 from hashlib import sha1
 from glob import glob
 
+import numpy as np
+
 from rnbgrader import JupyterKernel
 from rnbgrader.grader import (OPTIONAL_PROMPT, MARK_MARKUP_RE, NBRunner,
                               report, duplicates, Grader, CanvasGrader,
-                              NotebookError)
+                              NotebookError, CachedBuiltNotebook)
 from rnbgrader.answers import RegexAnswer, ImgAnswer, raw2regex, RawRegexAnswer
 
 import pytest
@@ -32,7 +34,7 @@ def test_optional_prompt():
 
 def test_report():
     runner = NBRunner()
-    nb_fileobj0 = io.StringIO("""
+    nb_fileobj0 = StringIO("""
 Text
 
 ```{r}
@@ -45,7 +47,7 @@ More text
 first_var
 ```
 """)
-    nb_fileobj1 = io.StringIO("""
+    nb_fileobj1 = StringIO("""
 Text
 
 ```{r}
@@ -172,7 +174,7 @@ def test_check_names():
 
 
 def test_error_report():
-    nb = io.StringIO("""
+    nb = StringIO("""
 
 Some text.
 
@@ -225,7 +227,7 @@ def test_initial_check():
 
 
 def test_markup_in_nb():
-    bare_nb = io.StringIO("""
+    bare_nb = StringIO("""
 
 Some text.
 
@@ -244,7 +246,7 @@ b <- 2
 """)
     assert CARS_GRADER.mark_markups(bare_nb) == ()
 
-    annotated_nb = io.StringIO("""
+    annotated_nb = StringIO("""
 
 Some text.
 
@@ -285,3 +287,39 @@ def test_markup_used():
     assert list(mb_marks.index) == ['unnamed'] * 7 + ['adjustments', 'markups']
     assert sum(mb_marks) == 80
     assert sum(g.grade_notebook(vr2)) == 40
+
+
+def test_cached_nb_file_like():
+    # Test we can used file-likes for notebook caching
+    nb_text = """
+Text
+
+```{r}
+#- A question
+first_var <- 99
+```
+
+More text
+
+```{r}
+first_var
+```
+
+```{r}
+#- Actual answer
+first_var
+```
+"""
+    cbn = CachedBuiltNotebook(StringIO(nb_text), NBRunner())
+    assert len(cbn.solution) == 3
+    assert cbn.solution[-1].chunk.code == '#- Actual answer\nfirst_var\n'
+
+    class MyG(Grader):
+
+        solution_rmds = (StringIO(nb_text),)
+
+
+    g = MyG()
+    solns = g.solutions
+    assert len(solns) == 1
+    assert len(solns[0]) == 3
