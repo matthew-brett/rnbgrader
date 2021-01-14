@@ -234,7 +234,7 @@ class Grader:
     def solutions(self):
         solutions = []
         for snb in self._solution_nbs:
-            solutions.append(self.remove_not_answers(snb.solution))
+            solutions.append(self.clear_not_answers(snb.solution))
         return solutions
 
     @property
@@ -272,8 +272,15 @@ class Grader:
         # Override to remove chunks that should not be taken as answers.
         return True
 
-    def remove_not_answers(self, ev_chunks):
-        return tuple(c for c in ev_chunks if self.chunk_is_answer(c))
+    def clear_not_answers(self, ev_chunks):
+        """ Clear results for chunks identified as not-answers
+        """
+        out_chunks = []
+        for c in ev_chunks:
+            if not self.chunk_is_answer(c):
+                c.results = []
+            out_chunks.append(c)
+        return tuple(out_chunks)
 
     def calc_adjustments(self, rk):
         """ Calculate adjustments at end of notebook, using kernel.
@@ -286,7 +293,7 @@ class Grader:
             ev_chunks = self.runner.run(fileish, rk)
             adjustments = self.calc_adjustments(rk)
         # Remove any not-answer chunks
-        ev_chunks = self.remove_not_answers(ev_chunks)
+        ev_chunks = self.clear_not_answers(ev_chunks)
         # Get adjustments from markup
         markups = sum(self.mark_markups(fileish))
         grid = full_grid(answers, ev_chunks)

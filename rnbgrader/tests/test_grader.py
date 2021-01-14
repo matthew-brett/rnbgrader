@@ -6,6 +6,7 @@ from io import StringIO
 import re
 from hashlib import sha1
 from glob import glob
+from copy import deepcopy
 
 import numpy as np
 
@@ -353,7 +354,10 @@ first_var
     with JupyterKernel('ir') as rk:
         chunks = runner.run(StringIO(nb_text), rk)
     g = Grader()
-    assert_seq_equal(chunks, g.remove_not_answers(chunks))
+    assert_seq_equal(chunks, g.clear_not_answers(chunks))
+    # Second chunk has results.
+    assert len(chunks[1].results) == 1
+
     # First check case where not-answer present raises error
 
     class MyG(Grader):
@@ -365,11 +369,13 @@ first_var
             self._chk_answer(RegexAnswer(
                 5,
                 OPTIONAL_PROMPT + r'99'),
-                1)
+                2)
 
     g = MyG()
-    # Doesn't remove any chunks.
-    assert_seq_equal(chunks, g.remove_not_answers(chunks))
+    # Doesn't clear any chunks.
+    assert_seq_equal(chunks, g.clear_not_answers(chunks))
+    assert len(chunks[1].results) == 1
+    # Therefore errors for duplicate outputs
     with pytest.raises(NotebookError):
         g.grade_notebook(StringIO(nb_text))
 
@@ -382,8 +388,10 @@ first_var
             return chunk.chunk.code != 'first_var\n'
 
     g2 = MyG2()
-    # Removes chunks.
-    assert_seq_equal([chunks[0], chunks[2]], g2.remove_not_answers(chunks))
+    # Clears output for not-answer chunk.
+    cleared = deepcopy(chunks[1])
+    cleared.results = []
+    assert_seq_equal([chunks[0], cleared, chunks[2]], g2.clear_not_answers(chunks))
     # Answers now not duplicated.
     assert np.all(np.array(g2.grade_notebook(StringIO(nb_text))) ==
                   [5, 0, 0])
