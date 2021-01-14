@@ -187,31 +187,47 @@ class Grader:
 
     def reset_answers(self):
         self._answers = []
+        self._last_soln_chunk_no = None
 
-    def add_answer(self, answer):
+    def add_answer(self, answer, soln_chunk_no=None):
         self._answers.append(answer)
+        self._last_soln_chunk_no = soln_chunk_no
 
     @property
     def answers(self):
         return self._answers
 
-    def _chk_answer(self, answer, sol_chunk_no, solution_no=0):
-        assert_answers_only(answer, sol_chunk_no,
-                            self.solutions[solution_no])
-        self.add_answer(answer)
+    def _lookup_chunk(self, chunk_no):
+        if isinstance(chunk_no, str):
+            if self._last_soln_chunk_no is None:
+                raise ValueError('String chunk no with unset last chunk '
+                                 'no attribute')
+            if chunk_no[0] in ('-+'):
+                return self._last_soln_chunk_no + int(chunk_no)
+        return chunk_no
 
-    def _get_img_answer(self, points, sol_chunk_no, solution_no=0, *, name=None):
+    def _chk_answer(self, answer, soln_chunk_spec, solution_no=0):
+        soln_chunk_no = self._lookup_chunk(soln_chunk_spec)
+        assert_answers_only(answer, soln_chunk_no,
+                            self.solutions[solution_no])
+        self.add_answer(answer, soln_chunk_no)
+
+    def _get_img_answer(self, points, soln_chunk_no, solution_no=0, *,
+                        name=None):
         soln_dir = self.solution_dirs[solution_no]
         return ImgAnswer(
             points,
-            pjoin(soln_dir, f'chunk-{sol_chunk_no}_item-0.png'),
+            pjoin(soln_dir, f'chunk-{soln_chunk_no}_item-0.png'),
             self.standard_box,
             name=name)
 
-    def _chk_img_answer(self, points, sol_chunk_no, solution_no=0, *, name=None):
+    def _chk_img_answer(self, points, soln_chunk_spec, solution_no=0, *,
+                        name=None):
+        soln_chunk_no = self._lookup_chunk(soln_chunk_spec)
         self._chk_answer(
-            self._get_img_answer(points, sol_chunk_no, solution_no, name=name),
-            sol_chunk_no,
+            self._get_img_answer(points, soln_chunk_no, solution_no,
+                                 name=name),
+            soln_chunk_no,
             solution_no)
 
     @property
