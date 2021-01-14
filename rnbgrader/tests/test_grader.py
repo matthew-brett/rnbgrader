@@ -311,13 +311,15 @@ first_var
 first_var
 ```
 """
-    cbn = CachedBuiltNotebook(StringIO(nb_text), NBRunner())
+    nb_fobj = StringIO(nb_text)
+    cbn = CachedBuiltNotebook(nb_fobj, NBRunner())
     assert len(cbn.solution) == 3
     assert cbn.solution[-1].chunk.code == '#- Actual answer\nfirst_var\n'
 
+
     class MyG(Grader):
 
-        solution_rmds = (StringIO(nb_text),)
+        solution_rmds = (nb_fobj,)
 
 
     g = MyG()
@@ -351,18 +353,20 @@ first_var
 first_var
 ```
 """
+    nb_fobj = StringIO(nb_text)
     with JupyterKernel('ir') as rk:
-        chunks = runner.run(StringIO(nb_text), rk)
+        chunks = runner.run(nb_fobj, rk)
     g = Grader()
     assert_seq_equal(chunks, g.clear_not_answers(chunks))
     # Second chunk has results.
     assert len(chunks[1].results) == 1
 
     # First check case where not-answer present raises error
+    nb_fobj.seek(0)
 
     class MyG(Grader):
 
-        solution_rmds = (StringIO(nb_text),)
+        solution_rmds = (nb_fobj,)
         total = 5
 
         def make_answers(self):
@@ -382,7 +386,7 @@ first_var
     # Check case with answer removed.
     class MyG2(MyG):
 
-        solution_rmds = (StringIO(nb_text),)
+        solution_rmds = (nb_fobj,)
 
         def chunk_is_answer(self, chunk):
             return chunk.chunk.code != 'first_var\n'

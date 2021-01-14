@@ -99,6 +99,27 @@ def report(results):
     return '\n'.join(lines)
 
 
+def _read_reset(fobj):
+    """ Read file-like `fobj` from current position, reset position
+
+    Parameters
+    ----------
+    fobj : file-like object
+        Implements ``tell``, ``seek`` and ``read``.
+
+    Returns
+    -------
+    contents : str
+        Contents read from file-like from starting position, as given by
+        ``fobj.tell()`` on entry to the function.  Position reset to starting
+        position after read.
+    """
+    pos = fobj.tell()
+    contents = fobj.read()
+    fobj.seek(pos)
+    return contents
+
+
 class CachedBuiltNotebook:
 
     def __init__(self, notebook_fileish, runner, cache_dir=None,
@@ -118,7 +139,7 @@ class CachedBuiltNotebook:
             Timeout for running individual cells.
         """
         if hasattr(notebook_fileish, 'read'):  # file object.
-            self.notebook_text = notebook_fileish.read()
+            self.notebook_text = _read_reset(notebook_fileish)
             self._nb_froot = sha1(
                 self.notebook_text.encode('latin1')).hexdigest()
         else:  # Filename.
