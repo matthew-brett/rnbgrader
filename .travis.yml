@@ -1,4 +1,4 @@
-dist: xenial   # required for Python >= 3.7
+dist: focal
 language: python
 
 sudo: true
@@ -56,19 +56,15 @@ matrix:
         - EXTRA_PIP_FLAGS="--pre"
 
 before_install:
-    # Install the latest version of R
-    - sudo apt-get install software-properties-common
-    - sudo add-apt-repository -y ppa:marutter/rrutter
-    # And libgit2
-    - sudo add-apt-repository -y ppa:cran/libgit2
     - sudo apt-get update
+    - sudo apt-get install -y software-properties-common
     - sudo apt-get install -y r-base-dev
-    # libgit2-dev for devtools
-    - sudo apt-get install libssh2-1-dev libgit2-dev
+    # libgit2-dev for R devtools
+    - sudo apt-get install libgit2-dev
     # Install irkernel
     # https://stackoverflow.com/questions/39805798/r-inline-plots-in-jupyter
     # https://irkernel.github.io/docs/IRkernel/0.7
-    - echo 'options("repos"="http://cran.rstudio.com")' > ~/.Rprofile
+    - echo 'options("repos"="https://cloud.r-project.org")' > ~/.Rprofile
     - sudo Rscript -e "install.packages(c('repr', 'IRdisplay', 'crayon', 'pbdZMQ', 'devtools'))"
     - sudo Rscript -e "devtools::install_github('IRkernel/IRkernel')"
     # Update virtualenv etc
