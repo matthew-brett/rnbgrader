@@ -92,44 +92,65 @@ def test_get_submissions_same_id():
         g.get_submissions(pjoin(DATA, 'test_submissions'))
 
 
+class Skip:
+    """ Flag to indicate we should skip this answer in compiling answers
+    """
+    pass
+
+
 class CarsGrader(CanvasGrader):
 
     solution_rmds = (pjoin(DATA, 'solution.Rmd'),)
     standard_box = (44, 81, 800, 770)
     total = 50
 
+    # Solution chunk positions, used in make_answers.
+    # This allows testing different chunk position specifications.
+    # Here we use simple positions.  Use Skip class to indicate we should
+    # skip this question in the specification.
+    _positions = tuple(range(1, 8))
+
     def make_answers(self):
         solution_dir = self.solution_dirs[0]
+        # Positions are class variable to allow for testing different position
+        # specifications.
+        ps = self._positions
 
-        self._chk_answer(RegexAnswer(
-            5,
-            OPTIONAL_PROMPT + r'50  2'),
-            1)
+        if ps[0] is not Skip:
+            self._chk_answer(RegexAnswer(
+                5,
+                OPTIONAL_PROMPT + r'50  2'),
+                ps[0])
 
         raw = """
             'data.frame':	50 obs. of  2 variables:
             $ speed: num  4 4 7 7 8 9 10 10 10 11 ...
             $ dist : num  2 10 4 22 16 10 18 26 34 17 ..."""
-        self._chk_answer(RegexAnswer(5, raw2regex(raw)), 2)
+
+        if ps[1] is not Skip:
+            self._chk_answer(RegexAnswer(5, raw2regex(raw)), ps[1])
 
         raw = """
             speed dist
-            1 4      2  
-            2 4     10  
-            3 7      4  
-            4 7     22  
-            5 8     16  
+            1 4      2
+            2 4     10
+            3 7      4
+            4 7     22
+            5 8     16
             6 9     10"""
-        self._chk_answer(RegexAnswer(5, raw2regex(raw)), 3)
+        if ps[2] is not Skip:
+            self._chk_answer(RegexAnswer(5, raw2regex(raw)), ps[2])
 
-        self._chk_answer(ImgAnswer(10,
-            pjoin(solution_dir, 'chunk-4_item-0.png'),
-            self.standard_box), 4)
+        if ps[3] is not Skip:
+            self._chk_answer(ImgAnswer(10,
+                pjoin(solution_dir, 'chunk-4_item-0.png'),
+                self.standard_box), ps[3])
 
         raw = """
             4  7  8  9 10 11 12 13 14 15 16 17 18 19 20 22 23 24 25 
             2  2  1  1  3  2  4  4  4  3  2  3  4  3  5  1  1  4  1"""
-        self._chk_answer(RawRegexAnswer(5, raw), 5)
+        if ps[4] is not Skip:
+            self._chk_answer(RawRegexAnswer(5, raw), ps[4])
 
         raw = """
         speed dist
@@ -139,17 +160,52 @@ class CarsGrader(CanvasGrader):
         30    17   40
         31    17   50
         32    18   42"""
-        self._chk_answer(RegexAnswer(10, raw2regex(raw)), 6)
+        if ps[5] is not Skip:
+            self._chk_answer(RegexAnswer(10, raw2regex(raw)), ps[5])
 
-        self._chk_img_answer(10, 7)
+        if ps[6] is not Skip:
+            self._chk_img_answer(10, ps[6])
 
 
 CARS_GRADER = CarsGrader()
 
 
-def test_solution():
-    assert sum(CARS_GRADER.grade_notebook(
-        pjoin(DATA, 'solution.Rmd'))) == 50
+def test_solutions_with_offsets():
+    soln_fname = pjoin(DATA, 'solution.Rmd')
+    # Basic position specification.
+    assert sum(CARS_GRADER.grade_notebook(soln_fname)) == 50
+
+    class G2(CarsGrader):
+        # Strings for integer positions are OK.
+        _positions = [str(i) for i in range(1, 8)]
+
+    assert sum(G2().grade_notebook(soln_fname)) == 50
+
+    class G3(CarsGrader):
+        # Offsets OK, as long as there is a base.
+        _positions = [1] + ['+1'] * 6
+
+    assert sum(G3().grade_notebook(soln_fname)) == 50
+
+    class G4(CarsGrader):
+        # There must be a base.
+        _positions = ['+1'] * 7
+
+    with pytest.raises(ValueError):
+        G4().grade_notebook(soln_fname)
+
+    class G5(CarsGrader):
+        # Can mix positions and offsets.
+        _positions = [1, '+1', 3, 4, '+1', 6, '+1']
+
+    assert sum(G5().grade_notebook(soln_fname)) == 50
+
+    class G6(CarsGrader):
+        # Can have offsets > 1
+        _positions = [1, Skip, '+2', Skip, 5, Skip, '+2']
+        total = 25
+
+    assert sum(G6().grade_notebook(soln_fname)) == 25
 
 
 def test_bit_bad():

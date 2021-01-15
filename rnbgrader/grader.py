@@ -220,12 +220,13 @@ class Grader:
 
     def _lookup_chunk(self, chunk_no):
         if isinstance(chunk_no, str):
-            if self._last_soln_chunk_no is None:
-                raise ValueError('String chunk no with unset last chunk '
-                                 'no attribute')
             if chunk_no[0] in ('-+'):
+                # Relative offset without origin.
+                if self._last_soln_chunk_no is None:
+                    raise ValueError('String chunk no with unset last chunk '
+                                     'no attribute')
                 return self._last_soln_chunk_no + int(chunk_no)
-        return chunk_no
+        return int(chunk_no)
 
     def _chk_answer(self, answer, soln_chunk_spec, solution_no=0):
         soln_chunk_no = self._lookup_chunk(soln_chunk_spec)
