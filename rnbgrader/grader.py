@@ -387,21 +387,24 @@ class Grader:
         self.check_submissions(submissions)
         return submissions
 
+    def do_grade(self, notebook_spec, show_answers):
+        if isdir(notebook_spec):
+            self.grade_all_notebooks(notebook_spec,
+                                     show_answers=show_answers)
+            return
+        marks = self.grade_notebook(notebook_spec)
+        if not show_answers:
+            print(sum(marks))
+        else:
+            print(marks, sum(marks))
+
     def main(self, args=None):
         parser = self.get_parser()
         args = parser.parse_args(args)
         if args.action == 'rebuild-solutions':
             self.rebuild()
         elif args.action == 'grade':
-            if isdir(args.notebook_file):
-                self.grade_all_notebooks(args.notebook_file,
-                                         show_answers=args.show_answers)
-            else:
-                marks = self.grade_notebook(args.notebook_file)
-                if not args.show_answers:
-                    print(sum(marks))
-                else:
-                    print(marks, sum(marks))
+            self.do_grade(args.notebook_file, args.show_answers)
         elif args.action == 'check-names':
             list(self.get_submissions(args.notebook_file))
             return 0
