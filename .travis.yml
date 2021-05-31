@@ -21,37 +21,38 @@ python:
     - 3.6
     - 3.7
     - 3.8
+    - 3.9
 
 matrix:
   include:
-    - python: 3.6
+    - python: 3.8
       env:
         - COVERAGE=1
         - DOCTESTS=1
     # Add absolute minimum dependencies
     # Also need minimums for Pillow
-    - python: 3.6
+    - python: 3.8
       env:
         - DEPENDS="numpy==1.12.0 pandas==0.23 jupyter_client==5.0.0 gradools"
     # Check also requirements.txt
-    - python: 3.6
+    - python: 3.8
       env:
         - INSTALL_TYPE=setup
-    - python: 3.6
+    - python: 3.8
       env:
         - INSTALL_TYPE=sdist
-    - python: 3.6
+    - python: 3.8
       env:
         - INSTALL_TYPE=wheel
-    - python: 3.6
+    - python: 3.8
       env:
         - INSTALL_TYPE=requirements
         - DEPENDS=
-    - python: 3.6
+    - python: 3.8
       env:
         - BUILD_DOC=1
     # Test pre-release versions of everything
-    - python: 3.6
+    - python: 3.8
       env:
         - EXTRA_PIP_FLAGS="--pre"
 
