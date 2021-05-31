@@ -74,7 +74,7 @@ def test_chunk():
 
 def test_rmd_header_re():
     assert (RMD_HEADER_RE.match('{r}') == None)
-    assert (RMD_HEADER_RE.match('``` {r}') == None)
+    assert (RMD_HEADER_RE.match('``` {r}').groups() == ('', 'r', ''))
     assert (RMD_HEADER_RE.match('```{r}').groups() == ('', 'r', ''))
     assert (RMD_HEADER_RE.match('   ```{r}').groups() == ('   ', 'r', ''))
     assert (RMD_HEADER_RE.match('```{r, echo=FALSE}').groups() ==
@@ -89,6 +89,8 @@ def test_rmd_header_re():
             ('', 'r', 'setup, include=FALSE'))
     assert (RMD_HEADER_RE.match('    ```{r setup, include=FALSE}').groups() == 
             ('    ', 'r', 'setup, include=FALSE'))
+    assert (RMD_HEADER_RE.match('    ```  {r setup, include=FALSE}').groups()
+            == ('    ', 'r', 'setup, include=FALSE'))
 
 
 def get_chunks(nb_str):

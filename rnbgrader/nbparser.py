@@ -56,7 +56,7 @@ class Chunk(object):
         return self.__dict__ == other.__dict__
 
 
-RMD_HEADER_RE = re.compile(r'^(\s*)```{(\w+)(?:[, ]*)(.*?)}\s*$')
+RMD_HEADER_RE = re.compile(r'^(\s*)```\s*{(\w+)(?:[, ]*)(.*?)}\s*$')
 
 
 def _parse_chunks(nb_str):
