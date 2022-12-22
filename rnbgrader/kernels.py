@@ -6,12 +6,13 @@ Jupyter messaging protocol.  See:
 http://jupyter-client.readthedocs.io/en/stable/index.html
 """
 # This file largely based on:
-# https://github.com/jupyter/jupyter_kernel_test/blob/76684c6780edd56e66e94c833b2d5e808da354c9/jupyter_kernel_test/__init__.py
+# https://github.com/jupyter/jupyter_kernel_test/blob/bc67231/jupyter_kernel_test/__init__.py
 # That file is
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
 import io
+import inspect
 from base64 import decodebytes
 from queue import Empty
 
@@ -29,7 +30,17 @@ else:
     run_sync = lambda x: x
 
 
+def ensure_sync(func):
+    if inspect.iscoroutinefunction(func):
+        return run_sync(func)
+    return func
+
+
 DEFAULT_TIMEOUT = 30
+
+
+class ValidationError(Exception):
+    pass
 
 
 class JupyterKernel:
@@ -59,8 +70,9 @@ class JupyterKernel:
             Arguments to pass to `start_kernel`. `cwd='some/path'` is one
             example.
         """
-        self.manager, self.client = start_new_kernel(kernel_name=kernel_name,
-                                                     **kwargs)
+        self.manager, self.client = start_new_kernel(
+            kernel_name=kernel_name,
+            **kwargs)
         self.timeout = timeout
 
     def shutdown(self):
@@ -77,15 +89,25 @@ class JupyterKernel:
 
     def flush_channels(self):
         """ Flush all kernel channels """
-        kwargs = {'timeout': 1}
-        if not JUPYTER_CLIENT_7:
-            kwargs['block'] = True
         for channel in (self.client.shell_channel, self.client.iopub_channel):
             while True:
                 try:
-                    run_sync(channel.get_msg)(**kwargs)
+                    ensure_sync(channel.get_msg)(timeout=0.1)
+                except TypeError:
+                    channel.get_msg(timeout=0.1)
                 except Empty:
                     break
+
+    def get_non_kernel_info_reply(self, timeout=None):
+        while True:
+            reply = self.client.get_shell_msg(timeout=timeout)
+            if reply["header"]["msg_type"] != "kernel_info_reply":
+                return reply
+
+    def validate_message(self, msg, msg_type):
+        if msg["header"]["msg_type"] != msg_type:
+            return ValidationError(
+                f'Expecting "{msg_type}" but got {msg}')
 
     def raw_run(self, code, timeout=None,
                  silent=False, store_history=True,
@@ -118,23 +140,25 @@ class JupyterKernel:
 
         kc = self.client
 
-        msg_id = kc.execute(code=code, silent=silent,
-                            store_history=store_history,
-                            stop_on_error=stop_on_error)
+        _ = kc.execute(code=code, silent=silent,
+                       store_history=store_history,
+                       stop_on_error=stop_on_error)
 
-        reply = kc.get_shell_msg(timeout=timeout)
+        reply = self.get_non_kernel_info_reply(timeout=timeout)
+        self.validate_message(reply, 'execute_reply')
 
-        busy_msg = run_sync(kc.iopub_channel.get_msg)(timeout=1)
+        busy_msg = ensure_sync(kc.iopub_channel.get_msg)(timeout=1)
+        self.validate_message(reply, 'status')
         assert busy_msg['content']['execution_state'] == 'busy'
 
         output_msgs = []
         while True:
-            msg = run_sync(kc.iopub_channel.get_msg)(timeout=1)
-            if msg['msg_type'] == 'status':
-                assert msg['content']['execution_state'] == 'idle'
+            msg = ensure_sync(kc.iopub_channel.get_msg)(timeout=0.1)
+            if msg["msg_type"] == "status":
+                assert msg["content"]["execution_state"] == "idle"
                 break
-            elif msg['msg_type'] == 'execute_input':
-                assert msg['content']['code'] == code
+            elif msg["msg_type"] == "execute_input":
+                assert msg["content"]["code"] == code
                 continue
             output_msgs.append(msg)
 
