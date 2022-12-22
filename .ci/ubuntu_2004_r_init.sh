@@ -6,7 +6,3 @@ sudo apt install -y software-properties-common
 sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'
 sudo apt update
 sudo apt install -y r-base libcurl4-openssl-dev libssl-dev libxml2-dev
-
-# Update pandoc to recent, for Panflute
-curl -L https://github.com/jgm/pandoc/releases/download/2.14.1/pandoc-2.14.1-1-amd64.deb -o pandoc.deb
-sudo dpkg --install pandoc.deb

@@ -49,7 +49,7 @@ brew install libgit2 harfbuzz fribidi
 On Debian / Ubuntu:
 
 ```
-sudo apt install -y libharfbuzz-dev  libfribidi-dev
+sudo apt install -y libgit2-dev libharfbuzz-dev libfribidi-dev
 ```
 
 On any platform:

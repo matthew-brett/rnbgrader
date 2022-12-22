@@ -37,6 +37,10 @@ jobs:
           sh .ci/ubuntu_2004_r_init.sh
           R --version | grep 'version '
 
+      - name: Install development libraries for R dev tools
+        run: |
+          sudo apt install -y libgit2-dev libharfbuzz-dev libfribidi-dev
+
       - name: Install libraries for R
         run: |
           Rscript -e "source('.ci/install_r_requirements.R')"
