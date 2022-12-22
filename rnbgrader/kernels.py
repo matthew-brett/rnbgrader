@@ -198,7 +198,10 @@ class JupyterKernel:
         """
         reply, output_msgs = self.raw_run(code, timeout, silent, store_history,
                                           stop_on_error)
-        assert reply['header']['msg_type'] == 'execute_reply'
+        msg_type = reply['header']['msg_type']
+        if not  msg_type == 'execute_reply':
+            raise ValueError('Expected "execute_reply" message '
+                             f'but got "{msg_type}"')
         outputs = [self._process_output(msg) for msg in output_msgs]
         return [p for p in outputs if p]
 
