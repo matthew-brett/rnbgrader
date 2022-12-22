@@ -5,7 +5,13 @@ import os.path as op
 from argparse import ArgumentParser
 
 import pandas as pd
-from nbconvert.preprocessors.execute import executenb, CellExecutionError
+
+try:  # Newer nbclient
+    from nbclient import execute as executenb
+    from nbclient.exceptions import CellExecutionError
+except ImportError:
+    from nbconvert.preprocessors.execute import executenb, CellExecutionError
+
 import jupyter_client
 
 import jupytext
@@ -97,7 +103,7 @@ def do_exe_checks(nb_fnames,
                   fails_only=False,
                  ):
     out = (pd.read_csv(in_filter_fname, index_col=0)[MSG_COLNAME]
-           if in_filter_fname else pd.Series(name=MSG_COLNAME))
+           if in_filter_fname else pd.Series(name=MSG_COLNAME, dtype=object))
     for nb_fname in nb_fnames:
         if nb_fname in out.index and out.loc[nb_fname] == 'ok':
             continue
