@@ -62,6 +62,10 @@ jobs:
         run: |
           Rscript -e "IRkernel::installspec()"
 
+      - name: Pyest-cov to allow coverage
+        run: |
+          pip install pytest-cov
+
       - name: Run tests
         run: |
           pytest rnbgrader --log-level DEBUG --cov-config=.coveragerc --cov=rnbgrader
