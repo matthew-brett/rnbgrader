@@ -142,16 +142,19 @@ class JupyterKernel:
 
     def _process_output(self, msg):
         content = msg['content']
-        if msg['msg_type'] == 'error':
+        msg_type = msg['msg_type']
+        if msg_type.startswith('comm_') or msg_type == 'clear_output':
+            return
+        if msg_type == 'error':
             return dict(type='error',
                         message=msg,
                         content=content['evalue'])
-        if msg['msg_type'] == 'stream':
+        if msg_type == 'stream':
             return dict(type=content['name'],
                         message=msg,
                         content=content['text'])
-        if msg['msg_type'] not in  ('display_data',
-                                    'execute_result'):
+        if msg_type not in  ('display_data',
+                             'execute_result'):
             raise RuntimeError("Don't recognize message type " +
                                msg['msg_type'])
         data = msg['content']['data']
@@ -196,7 +199,8 @@ class JupyterKernel:
         reply, output_msgs = self.raw_run(code, timeout, silent, store_history,
                                           stop_on_error)
         assert reply['header']['msg_type'] == 'execute_reply'
-        return [self._process_output(msg) for msg in output_msgs]
+        outputs = [self._process_output(msg) for msg in output_msgs]
+        return [p for p in outputs if p]
 
     def __enter__(self):
         return self
