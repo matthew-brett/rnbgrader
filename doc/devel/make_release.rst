@@ -21,29 +21,12 @@ Releasing rnbgrader
 
 * Check the copyright years in ``doc/conf.py`` and ``LICENSE``;
 
-* Check the output of::
+* Check `rnbgrader Github Actions results
+  <https://github.com/matthew-brett/rnbgrader/actions>`_.
 
-    rst2html.py README.rst > ~/tmp/readme.html
-
-  because this will be the output used by PyPi_
-
-* Check `rnbgrader travis-ci`_.
-
-* Once everything looks good, you are ready to upload the source release to
-  PyPi.  See `setuptools intro`_.  Make sure you have a file
-  ``\$HOME/.pypirc``, of form::
-
-    [distutils]
-    index-servers =
-        pypi
-
-    [pypi]
-    repository: https://upload.pypi.io/legacy/
-    username:your.pypi.username
-    password:your-password
-
-* Once everything looks good, tag the release.  This will also set the version
-  (we are using versioneer_ to manage versions via git tags)::
+* Once everything looks good, tag the release.  This will also set
+  the version (we are using versioneer_ to manage versions via git
+  tags)::
 
     git tag -s 0.3
 
