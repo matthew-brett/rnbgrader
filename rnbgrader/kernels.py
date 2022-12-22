@@ -77,7 +77,7 @@ class JupyterKernel:
 
     def flush_channels(self):
         """ Flush all kernel channels """
-        kwargs = {'timeout': 0.1}
+        kwargs = {'timeout': 1}
         if not JUPYTER_CLIENT_7:
             kwargs['block'] = True
         for channel in (self.client.shell_channel, self.client.iopub_channel):
@@ -129,7 +129,7 @@ class JupyterKernel:
 
         output_msgs = []
         while True:
-            msg = run_sync(kc.iopub_channel.get_msg)(timeout=0.1)
+            msg = run_sync(kc.iopub_channel.get_msg)(timeout=1)
             if msg['msg_type'] == 'status':
                 assert msg['content']['execution_state'] == 'idle'
                 break
