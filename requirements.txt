@@ -10,3 +10,4 @@ gradools
 ipykernel
 jupytext
 nbconvert
+gradools
