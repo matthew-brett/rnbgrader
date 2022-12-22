@@ -1,6 +1,5 @@
 [run]
 branch = True
 source = rnbgrader
-include = */rnbgrader/*
 omit =
     rnbgrader/_version.py
