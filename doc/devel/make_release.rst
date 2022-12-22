@@ -39,9 +39,9 @@ Releasing rnbgrader
 
 * When ready::
 
-    python setup.py sdist --formats=zip
+    python setup.py sdist
     # -s flag to sign the release
-    twine upload -s dist/rnbgrader*zip
+    twine upload -s dist/rnbgrader*tar.gz
 
 * Upload the release commit and tag to github::
 
