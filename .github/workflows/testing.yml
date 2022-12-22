@@ -1,0 +1,63 @@
+name: Build and run tests
+
+on:
+  push:
+    branches:
+      - main
+    pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    env:
+      R_LIBS_USER: ~/R_libs:~/R:~/R-dev
+
+    steps:
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.local
+            ~/.ccache
+            ~/R
+            ~/R_libs
+            ~/R-dev
+          key: ${{ runner.os }}-${{ hashFiles('requirements.txt') }}-${{ hashFiles('.ci/install_r_requirements.R') }}
+
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - name: Install R
+        run: |
+          sh .ci/ubuntu_2004_r_init.sh
+          R --version | grep 'version '
+
+      - name: Install libraries for R
+        run: |
+          Rscript -e "source('.ci/install_r_requirements.R')"
+
+      - name: Install Python test dependencies
+        run: |
+          pip install -r test-requirements
+
+      - name: Install rnbgrader
+        run: |
+          pip install .
+
+      - name: Run tests
+        run: |
+          pytest rnbgrader --log-level DEBUG --cov-config=.coveragerc --cov=rnbgrader
+
+      - name: Collect code coverage data
+        run: |
+          coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true
