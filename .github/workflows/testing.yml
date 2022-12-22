@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       R_LIBS_USER: ~/R_libs:~/R:~/R-dev
+      # To get round rate limits in Github installs
+      # https://github.com/r-lib/remotes/issues/638
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
@@ -53,6 +55,12 @@ jobs:
       - name: Install rnbgrader
         run: |
           pip install .
+
+      - name: Intall IRKernel
+        # To register IRKernel in the current R installation
+        # Run here after we have installed jupyter-client
+        run: |
+          RScript -e "IRkernel::installspec()"
 
       - name: Run tests
         run: |

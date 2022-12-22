@@ -32,5 +32,7 @@ fs::dir_create('~/R-dev')  # ?also correct for Windows
 
 # IRKernel
 devtools::install_github('IRkernel/IRkernel')
-# To register the kernel in the current R installation
-IRkernel::installspec()
+
+# We will finally need to to register IRKernel in the current R
+# installation, but only after we have installed jupyter-client.
+# RScript -e "IRkernel::installspec()"
