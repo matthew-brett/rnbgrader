@@ -18,6 +18,17 @@ from queue import Empty
 from PIL import Image
 from jupyter_client.manager import start_new_kernel
 
+# https://github.com/jupyter/jupyter_console/pull/244
+import jupyter_client
+
+# jupyter_client 7.0+ has async channel methods that we expect to be sync here
+JUPYTER_CLIENT_7 = jupyter_client.version_info >= (7,)
+if JUPYTER_CLIENT_7:
+    from jupyter_client.utils import run_sync
+else:
+    run_sync = lambda x: x
+
+
 DEFAULT_TIMEOUT = 30
 
 
@@ -66,10 +77,13 @@ class JupyterKernel:
 
     def flush_channels(self):
         """ Flush all kernel channels """
+        kwargs = {'timeout': 0.1}
+        if not JUPYTER_CLIENT_7:
+            kwargs['block'] = True
         for channel in (self.client.shell_channel, self.client.iopub_channel):
             while True:
                 try:
-                    channel.get_msg(block=True, timeout=0.1)
+                    run_sync(channel.get_msg)(**kwargs)
                 except Empty:
                     break
 
@@ -110,12 +124,12 @@ class JupyterKernel:
 
         reply = kc.get_shell_msg(timeout=timeout)
 
-        busy_msg = kc.iopub_channel.get_msg(timeout=1)
+        busy_msg = run_sync(kc.iopub_channel.get_msg)(timeout=1)
         assert busy_msg['content']['execution_state'] == 'busy'
 
         output_msgs = []
         while True:
-            msg = kc.iopub_channel.get_msg(timeout=0.1)
+            msg = run_sync(kc.iopub_channel.get_msg)(timeout=0.1)
             if msg['msg_type'] == 'status':
                 assert msg['content']['execution_state'] == 'idle'
                 break
