@@ -50,7 +50,7 @@ jobs:
 
       - name: Install Python test dependencies
         run: |
-          pip install -r test-requirements
+          pip install -r test-requirements.txt
 
       - name: Install rnbgrader
         run: |
