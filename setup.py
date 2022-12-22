@@ -62,7 +62,8 @@ setup(name='rnbgrader',
       python_requires = '>=3.6',
       entry_points={
           'console_scripts': [
-              'rnbgrader-exe-check = rnbgrader.execheck:main',
+              'rnbg-exe-check = rnbgrader.execheck:main',
+              'rnbg-allow-raise = rnbgrader.allow_raise:main',
           ],
       },
       )
