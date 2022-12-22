@@ -13,6 +13,12 @@ rnbgrader change log
 Releases
 ********
 
+* 0.3 (Thursday December 22 2022)
+
+  * Adapt to jupyter-client>=7
+  * Add allow_raises code and CLI
+  * Rename executable to prefix rnbg- (with deprecation warning)
+
 * 0.2 (Monday March 30 2020)
 
   * Generalize to Python notebooks in RMarkdown format (courtesy of Jupytext).
