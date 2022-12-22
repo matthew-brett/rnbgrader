@@ -1,6 +1,7 @@
 """ Execute checks for notebooks
 """
 
+import sys
 import os.path as op
 from argparse import ArgumentParser
 
@@ -134,3 +135,10 @@ def main():
                             args.fails_only)
     for fn, result in results.iteritems():
         print(f'{fn:40s}: {result}')
+
+
+def old_main():
+    # Deprecate old command name.
+    sys.stderr.write('Please use "rnbg-exe-check" command instead\n')
+    sys.stderr.write('This command name will go away in some future version\n')
+    main()
