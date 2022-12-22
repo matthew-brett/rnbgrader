@@ -9,11 +9,24 @@ on:
 jobs:
   test:
     runs-on: ubuntu-20.04
+
     env:
       R_LIBS_USER: ~/R_libs:~/R:~/R-dev
       # To get round rate limits in Github installs
       # https://github.com/r-lib/remotes/issues/638
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    strategy:
+
+      matrix:
+
+        include:
+
+          - python-version: 3.7
+          - python-version: 3.8
+          - python-version: 3.9
+          - python-version: "3.10"
+          - python-version: 3.7
 
     steps:
       - uses: actions/cache@v2
@@ -31,9 +44,10 @@ jobs:
         with:
           submodules: true
 
-      - uses: actions/setup-python@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          python-version: "3.x"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install R
         run: |
