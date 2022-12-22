@@ -60,7 +60,7 @@ jobs:
         # To register IRKernel in the current R installation
         # Run here after we have installed jupyter-client
         run: |
-          RScript -e "IRkernel::installspec()"
+          Rscript -e "IRkernel::installspec()"
 
       - name: Run tests
         run: |
