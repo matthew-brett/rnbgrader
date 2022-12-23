@@ -45,7 +45,7 @@ def write_skipped(in_fname, out_fname=None):
 def get_parser():
     parser = ArgumentParser(description=__doc__,  # Usage from docstring
                             formatter_class=RawDescriptionHelpFormatter)
-    parser.add_argument('notebook_fname',
+    parser.add_argument('notebook_fname', nargs='+',
                         help='Notebook filename')
     parser.add_argument(
         '-o', '--out-notebook',
@@ -56,7 +56,14 @@ def get_parser():
 def main():
     parser = get_parser()
     args = parser.parse_args()
-    write_skipped(args.notebook_fname, args.out_notebook)
+    if len(args.notebook_fname) > 1:
+        if args.out_notebook:
+            raise RuntimeError('out-notebook option only valid'
+                               'for single notebook input')
+        for nb_fname in args.notebook_fname:
+            write_skipped(nb_fname)
+    else:
+        write_skipped(args.notebook_fname[0], args.out_notebook)
 
 
 if __name__ == '__main__':
