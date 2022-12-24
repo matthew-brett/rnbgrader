@@ -167,6 +167,8 @@ class JupyterKernel:
     def _process_output(self, msg):
         content = msg['content']
         msg_type = msg['msg_type']
+        if msg_type.startswith('comm_') or msg_type == 'clear_output':
+            return
         if msg_type == 'error':
             return dict(type='error',
                         message=msg,
