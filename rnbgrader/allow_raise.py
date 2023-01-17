@@ -20,7 +20,7 @@ def add_raises_exception(cell):
 
 
 def skipper(nb, print_err=True, **kwargs):
-    """ Run notebook `nb`, add skip markup to cells causing error
+    r""" Run notebook `nb`, add skip markup to cells causing error
 
     Parameters
     ----------
@@ -30,7 +30,14 @@ def skipper(nb, print_err=True, **kwargs):
         Print error messages.
     \*\*kwargs : dict, optional
         Arguments to be passed to :class:`JupyterKernel`, such as ``cwd``
+
+    Returns
+    -------
+    skipped_nb : dict
+        Jupyter notebook with allow-raise markup added to metadata for erroring
+        cells.
     """
+    nb = deepcopy(nb)
     old_cells = deepcopy(nb.cells)
     kernel_name = nb['metadata'].get('kernelspec', {}).get('name')
     kernel = JupyterKernel(kernel_name, **kwargs)

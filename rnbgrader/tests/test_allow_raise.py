@@ -24,7 +24,7 @@ def rmd_equal(txt1, txt2):
 
 def test_skipper():
     nb = jupytext.read(AR_IN_PTH)
-    proc_nb = skipper(nb)
+    proc_nb, _ = skipper(nb)
     proc_txt = jupytext.writes(proc_nb, 'rmarkdown')
     assert rmd_equal(AR_OUT_PTH.read_text(), proc_txt)
 
