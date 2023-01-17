@@ -19,27 +19,45 @@ def add_raises_exception(cell):
         meta['tags'].append('raises-exception')
 
 
-def skipper(nb):
+def skipper(nb, print_err=True, **kwargs):
+    """ Run notebook `nb`, add skip markup to cells causing error
+
+    Parameters
+    ----------
+    nb : dict
+        Jupyter notebook
+    print_err: {True, False}, optional
+        Print error messages.
+    \*\*kwargs : dict, optional
+        Arguments to be passed to :class:`JupyterKernel`, such as ``cwd``
+    """
     old_cells = deepcopy(nb.cells)
     kernel_name = nb['metadata'].get('kernelspec', {}).get('name')
-    kernel = JupyterKernel(kernel_name)
+    kernel = JupyterKernel(kernel_name, **kwargs)
+    errors = []
     for i, cell in enumerate(old_cells):
         if cell['cell_type'] == 'code':
             msgs = kernel.run_code(cell['source'])
-            if 'error' in [m['type'] for m in msgs]:
+            err_msgs = [m for m in msgs if m['type'] == 'error']
+            if err_msgs:
                 add_raises_exception(cell)
+                errors += err_msgs
         nb.cells[i] = cell
-    return nb
+    return nb, errors
 
 
-def write_skipped(in_fname, out_fname=None):
+def write_skipped(in_fname, out_fname=None, show_errors=False):
     out_fname = in_fname if out_fname is None else out_fname
     nb_pth = Path(in_fname)
     in_txt = nb_pth.read_text()
     fmt, opts = jupytext.guess_format(in_txt, nb_pth.suffix)
     nb = jupytext.reads(in_txt, fmt=fmt)
-    proc_nb = skipper(nb)
+    proc_nb, errors = skipper(nb, cwd=nb_pth.parent)
     jupytext.write(proc_nb, out_fname, fmt=fmt)
+    if show_errors and errors:
+        print(f'Errors for {nb_pth}')
+        for error in errors:
+            print(error['content'])
 
 
 def get_parser():
@@ -50,6 +68,9 @@ def get_parser():
     parser.add_argument(
         '-o', '--out-notebook',
         help='Name for notebook output (default overwrite input)')
+    parser.add_argument(
+        '-E', '--show-errors', action='store_true',
+        help='If set, display errors for notebook cells')
     return parser
 
 
@@ -61,7 +82,7 @@ def main():
             raise RuntimeError('out-notebook option only valid'
                                'for single notebook input')
         for nb_fname in args.notebook_fname:
-            write_skipped(nb_fname)
+            write_skipped(nb_fname, show_errors=args.show_errors)
     else:
         write_skipped(args.notebook_fname[0], args.out_notebook)
 
