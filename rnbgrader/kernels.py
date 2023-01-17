@@ -67,7 +67,7 @@ class JupyterKernel:
         timeout : float, optional
             Default timeout in seconds.
         \*\*kwargs : dict
-            Arguments to pass to `start_kernel`. `cwd='some/path'` is one
+            Arguments to pass to `start_new_kernel`. `cwd='some/path'` is one
             example.
         """
         self.manager, self.client = start_new_kernel(
