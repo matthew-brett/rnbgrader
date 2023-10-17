@@ -13,6 +13,13 @@ rnbgrader change log
 Releases
 ********
 
+* 0.3.3 (Monday October 17 2023)
+
+  Bug fix release.
+
+  * Fix tests
+  * Add --show-errors flag to allow raise.
+
 * 0.3.2 (Saturday December 22 2022)
 
   Bug fix release.
