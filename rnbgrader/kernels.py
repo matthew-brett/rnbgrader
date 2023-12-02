@@ -192,6 +192,8 @@ class JupyterKernel:
             return dict(type='text',
                         message=msg,
                         content=data['text/plain'])
+        if 'text/html' in data:
+            return {}
         raise RuntimeError("Don't recognize data {}".format(data))
 
     def run_code(self, code, timeout=None,
