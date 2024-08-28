@@ -133,7 +133,7 @@ def main():
                             args.in_filter,
                             args.out_filter,
                             args.fails_only)
-    for fn, result in results.iteritems():
+    for fn, result in results.items():
         print(f'{fn:40s}: {result}')
 
 
