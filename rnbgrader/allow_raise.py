@@ -53,13 +53,13 @@ def skipper(nb, print_err=True, **kwargs):
     return nb, errors
 
 
-def write_skipped(in_fname, out_fname=None, show_errors=False):
+def write_skipped(in_fname, out_fname=None, show_errors=False, **kwargs):
     out_fname = in_fname if out_fname is None else out_fname
     nb_pth = Path(in_fname)
     in_txt = nb_pth.read_text()
     fmt, opts = jupytext.guess_format(in_txt, nb_pth.suffix)
     nb = jupytext.reads(in_txt, fmt=fmt)
-    proc_nb, errors = skipper(nb, cwd=nb_pth.parent)
+    proc_nb, errors = skipper(nb, cwd=nb_pth.parent, **kwargs)
     jupytext.write(proc_nb, out_fname, fmt=fmt)
     if show_errors and errors:
         print(f'Errors for {nb_pth}')
