@@ -13,6 +13,15 @@ rnbgrader change log
 Releases
 ********
 
+* 0.3.4 (Wednesday October 23 2024):
+
+  Bug fix release.
+
+  * Update versioneer for Python 3.12.
+  * Update for recent Python (iteritems -> items).
+  * Filter out HTML outputs.
+  * Allow arguments to passed through write_skipped
+
 * 0.3.3 (Monday October 17 2023)
 
   Bug fix release.
