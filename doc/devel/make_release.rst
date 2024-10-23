@@ -41,8 +41,7 @@ Releasing rnbgrader
 
     pip install build twine
     python -m build --sdist
-    # -s flag to sign the release
-    twine upload -s dist/rnbgrader*tar.gz
+    twine upload dist/rnbgrader*tar.gz
 
 * Upload the release commit and tag to github::
 
