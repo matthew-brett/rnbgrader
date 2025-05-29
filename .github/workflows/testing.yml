@@ -51,7 +51,7 @@ jobs:
 
       - name: Install R
         run: |
-          apt install -y r-base libcurl4-openssl-dev libssl-dev libxml2-dev
+          sudo apt install -y r-base libcurl4-openssl-dev libssl-dev libxml2-dev
           R --version | grep 'version '
 
       - name: Install development libraries for R dev tools
