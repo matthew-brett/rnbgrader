@@ -55,14 +55,6 @@ jobs:
         with:
           r-version: 'release'
 
-      - name: Install development libraries for R dev tools
-        run: |
-          sudo apt install -y libgit2-dev libharfbuzz-dev libfribidi-dev
-
-      - name: Install libraries for R
-        run: |
-          Rscript -e "source('.ci/install_r_requirements.R')"
-
       - name: Install Python test dependencies
         run: |
           pip install -r test-requirements.txt
@@ -71,13 +63,11 @@ jobs:
         run: |
           pip install .
 
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
-
       - name: Intall IRKernel
         # To register IRKernel in the current R installation
         # Run here after we have installed jupyter-client
         run: |
+          Rscript -e "install.packages('IRkernel')"
           Rscript -e "IRkernel::installspec()"
 
       - name: Pyest-cov to allow coverage
