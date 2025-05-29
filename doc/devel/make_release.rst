@@ -42,7 +42,9 @@ Releasing rnbgrader
 
 * Tag the release::
 
-   git tag -s 0.3.5
+    git tag -s 0.3.5
+
+* Update the version in `rnbgrader/__init__.py`.
 
 * Upload the release commit and tag to github::
 
