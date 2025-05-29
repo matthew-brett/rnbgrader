@@ -63,15 +63,18 @@ jobs:
         run: |
           pip install .
 
-      - name: Intall IRKernel
+      - name: Install IRKernel
         # To register IRKernel in the current R installation
         # Run here after we have installed jupyter-client
         run: |
           Rscript -e "install.packages('IRkernel')"
-          Rscript -e "IRkernel::installspec()"
 
       - name: Setup upterm session
         uses: lhotari/action-upterm@v1
+
+      - name: Run IRKernel install
+        run: |
+          Rscript -e "IRkernel::installspec()"
 
       - name: Pyest-cov to allow coverage
         run: |
