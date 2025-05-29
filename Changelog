@@ -13,6 +13,12 @@ rnbgrader change log
 Releases
 ********
 
+* 0.3.5 (Thursday May 29 2025):
+
+  Maintenance release.
+
+  * Move from setup.cfg to pyproject.toml build configuration.
+
 * 0.3.4 (Wednesday October 23 2024):
 
   Bug fix release.

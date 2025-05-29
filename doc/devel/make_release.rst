@@ -24,11 +24,8 @@ Releasing rnbgrader
 * Check `rnbgrader Github Actions results
   <https://github.com/matthew-brett/rnbgrader/actions>`_.
 
-* Once everything looks good, tag the release.  This will also set
-  the version (we are using versioneer_ to manage versions via git
-  tags)::
-
-    git tag -s 0.3
+* Once everything looks good, set the release version.  Edit
+  `rnbgrader/__init__.py` to set the version.
 
 * Clean::
 
@@ -42,6 +39,10 @@ Releasing rnbgrader
     pip install build twine
     python -m build --sdist
     twine upload dist/rnbgrader*tar.gz
+
+* Tag the release::
+
+   git tag -s 0.3.5
 
 * Upload the release commit and tag to github::
 

@@ -10,11 +10,6 @@
 .. _rnbgrader travis-ci: https://travis-ci.org/matthew-brett/rnbgrader
 .. _documentation: https://matthew-brett.github.com/rnbgrader
 
-.. Code support
-.. _versioneer: https://github.com/warner/python-versioneer
-.. _setuptools intro:
-   http://packages.python.org/an_example_pypi_project/setuptools.html
-
 .. Relevant projects
 .. _pandoc: http://pandoc.org
 .. _jupyter: jupyter.org
@@ -33,7 +28,6 @@
 .. _python: https://www.python.org
 .. _python standard library: http://docs.python.org/3/library
 .. _python.org releases: http://www.python.org/download/releases
-.. _setuptools: http://pypi.python.org/pypi/setuptools
 .. _matplotlib: http://matplotlib.org/
 .. _nose: http://readthedocs.org/docs/nose/en/latest
 .. _pytest: https://pytest.org

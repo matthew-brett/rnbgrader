@@ -1,0 +1,65 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "rnbgrader"
+dynamic = ["version", "description"]
+authors = [
+    { name = "Matthew Brett", email = "matthew.brett@gmail.com" },
+]
+maintainers = [
+    { name = "Matthew Brett", email = "matthew.brett@gmail.com" },
+]
+license = { text = "BSD license" }
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: BSD License',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
+    'Topic :: Scientific/Engineering',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Operating System :: Unix',
+    'Operating System :: MacOS',
+]
+readme = "README.md"
+# Check against requirements.txt
+dependencies = [
+    'numpy>=1.12.0',
+    'pandas>=0.23',
+    'Pillow',
+    'pypandoc',
+    'jupyter_client>=5.0.0',
+    'tornado',
+    'gradools',
+    'ipykernel',
+    'jupytext',
+    'nbconvert',
+    'gradools',
+]
+requires-python=">=3.6"
+
+[project.urls]
+Homepage = "https://github.com/matthew-brett/rnbgrader"
+
+[project.optional-dependencies]
+test = [
+    'pytest',
+    'matplotlib',
+]
+
+[project.scripts]
+rnbgrader-exe-check = "rnbgrader.execheck:old_main"
+rnbg-exe-check = "rnbgrader.execheck:main"
+rnbg-allow-raise = "rnbgrader.allow_raise:main"

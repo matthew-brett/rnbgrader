@@ -1,7 +1,7 @@
 # RNBGrader - utilities for grading R Markdown notebooks
 
 Utilities for grading notebooks in [R
-Markdown](https://rmarkdown.rstudio.com)
+Markdown](https://rmarkdown.rstudio.com).
 
 Notebooks can be [R
 notebooks](https://bookdown.org/yihui/rmarkdown/notebook.html) or
@@ -42,19 +42,19 @@ You need the R kernel installed for the tests.
 
 On Mac:
 
-```
+```bash
 brew install libgit2 harfbuzz fribidi
 ```
 
 On Debian / Ubuntu:
 
-```
+```bash
 sudo apt install -y libgit2-dev libharfbuzz-dev libfribidi-dev
 ```
 
 On any platform:
 
-```
+```bash
 Rscript -e "install.packages(c('repr', 'IRdisplay', 'crayon', 'pbdZMQ', 'devtools'))"
 Rscript -e "devtools::install_github('IRkernel/IRkernel')"
 Rscript -e "IRkernel::installspec()"
@@ -65,13 +65,13 @@ Rscript -e "IRkernel::installspec()"
 *   Install `rnbgrader`
 *   Install the test requirements:
 
-    ```
+    ```bash
     pip install -r test-requirements
     ```
 
 *   Run the tests with:
 
-    ```
+    ```bash
     pytest rnbgrader
     ```
 
