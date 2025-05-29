@@ -61,6 +61,7 @@ jobs:
 
       - name: Install libraries for R
         run: |
+          sudo apt install r-cran-devtools
           Rscript -e "source('.ci/install_r_requirements.R')"
 
       - name: Install Python test dependencies

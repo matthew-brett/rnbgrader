@@ -18,7 +18,8 @@ if (getOption('repos')["CRAN"] == "@CRAN@") {
 # https://irkernel.github.io/docs/IRkernel/0.7/
 
 # https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
-to_install <- c('repr', 'IRdisplay', 'crayon', 'pbdZMQ', 'devtools')
+# Install devtools with `apt install r-cran-devtools`
+to_install <- c('repr', 'IRdisplay', 'crayon', 'pbdZMQ')
 to_install <- to_install[!(to_install %in% installed.packages()[,"Package"])]
 if (length(to_install)) {
     install.packages(to_install)
