@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - main
-    pull_request:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
@@ -22,10 +24,9 @@ jobs:
 
         include:
 
-          - python-version: 3.9
           - python-version: "3.10"
           - python-version: "3.11"
-          - python-version: "3.12"
+        # - python-version: "3.12"
           - python-version: "3.13"
 
     steps:
@@ -50,19 +51,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install R
-        run: |
-          sudo apt update
-          sudo apt install -y r-base libcurl4-openssl-dev libssl-dev libxml2-dev
-          R --version | grep 'version '
-
-      - name: Install development libraries for R dev tools
-        run: |
-          sudo apt install -y libgit2-dev libharfbuzz-dev libfribidi-dev
-
-      - name: Install libraries for R
-        run: |
-          sudo apt install r-cran-devtools
-          Rscript -e "source('.ci/install_r_requirements.R')"
+        uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
 
       - name: Install Python test dependencies
         run: |
@@ -72,7 +63,11 @@ jobs:
         run: |
           pip install .
 
-      - name: Intall IRKernel
+      - name: Install IRKernel
+        run: |
+          Rscript -e "install.packages('IRkernel')"
+
+      - name: Initialize IRKernel
         # To register IRKernel in the current R installation
         # Run here after we have installed jupyter-client
         run: |
